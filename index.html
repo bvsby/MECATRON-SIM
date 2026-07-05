@@ -3,335 +3,342 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>RoboSim</title>
+<title>RoboSim — Simulateur de Robots</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --bg: #0d1117; --s1: #161b22; --s2: #1c2128; --s3: #21262d;
-  --b1: #30363d; --b2: #444c56; --b3: #6e7681;
-  --t1: #e6edf3; --t2: #8b949e; --t3: #484f58;
-  --blue: #58a6ff; --green: #3fb950; --red: #f85149;
-  --amber: #d29922; --purple: #bc8cff; --cyan: #39d0d8; --orange: #f0883e;
-  --safe: env(safe-area-inset-bottom, 0px);
+  --bg: #f5f6f8;
+  --s1: #ffffff;
+  --s2: #f0f1f4;
+  --s3: #e7e9ed;
+  --b1: #e0e2e7;
+  --b2: #cbced6;
+  --b3: #9aa0ab;
+  --t1: #1c2128;
+  --t2: #5b6270;
+  --t3: #9aa0ab;
+  --blue: #2563eb;
+  --blue-l: #eff4ff;
+  --green: #16a34a;
+  --green-l: #effaf1;
+  --red: #dc2626;
+  --red-l: #fef2f2;
+  --amber: #b45309;
+  --amber-l: #fffaeb;
+  --purple: #7c3aed;
+  --cyan: #0891b2;
+  --orange: #ea580c;
+  --shadow-sm: 0 1px 2px rgba(20,24,32,.06);
+  --shadow-md: 0 2px 8px rgba(20,24,32,.08);
+  --shadow-lg: 0 8px 28px rgba(20,24,32,.12);
 }
 
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 html, body { height:100%; overflow:hidden; touch-action:none; }
 body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--t1); }
 
-/* ── APP SHELL ── */
 #app { display:flex; flex-direction:column; height:100dvh; height:100vh; }
 
 /* ── TOPBAR ── */
-#topbar {
-  height:52px; background:var(--s1); border-bottom:1px solid var(--b1);
-  display:flex; align-items:center; padding:0 12px; gap:8px;
-  flex-shrink:0; overflow-x:auto; overflow-y:hidden;
+nav {
+  height:54px; background:var(--s1); border-bottom:1px solid var(--b1);
+  display:flex; align-items:center; padding:0 16px; gap:10px;
+  flex-shrink:0; overflow-x:auto; overflow-y:hidden; box-shadow:var(--shadow-sm);
+  position:relative; z-index:20;
 }
-#topbar::-webkit-scrollbar { display:none; }
-.logo { font-weight:700; font-size:15px; display:flex; align-items:center; gap:7px; flex-shrink:0; }
-.dot { width:8px; height:8px; border-radius:50%; background:var(--blue); box-shadow:0 0 10px var(--blue); animation:glow 2s infinite; }
-@keyframes glow { 0%,100%{box-shadow:0 0 8px var(--blue)} 50%{box-shadow:0 0 20px var(--blue)} }
-.sep { width:1px; height:22px; background:var(--b1); flex-shrink:0; }
+nav::-webkit-scrollbar { display:none; }
+.logo { font-weight:700; font-size:15.5px; display:flex; align-items:center; gap:8px; flex-shrink:0; color:var(--t1); }
+.logo-mark {
+  width:26px; height:26px; border-radius:7px;
+  background:linear-gradient(135deg,#2563eb,#0891b2);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 2px 6px rgba(37,99,235,.35);
+}
+.logo-mark svg { width:15px; height:15px; }
+.sep { width:1px; height:24px; background:var(--b1); flex-shrink:0; }
 
-/* Robot tabs */
-.rtabs { display:flex; gap:3px; flex-shrink:0; }
+.rtabs { display:flex; gap:4px; flex-shrink:0; background:var(--s2); padding:3px; border-radius:9px; }
 .rtab {
-  height:30px; padding:0 10px; border-radius:6px; border:1px solid var(--b1);
-  background:transparent; color:var(--t3); font:500 12px 'Inter'; cursor:pointer;
-  white-space:nowrap; transition:all .12s; display:flex; align-items:center; gap:5px;
+  height:32px; padding:0 12px; border-radius:6px; border:none;
+  background:transparent; color:var(--t2); font:500 12.5px 'Inter'; cursor:pointer;
+  white-space:nowrap; transition:all .14s; display:flex; align-items:center; gap:6px;
 }
-.rtab.on { background:rgba(88,166,255,.12); border-color:rgba(88,166,255,.4); color:var(--blue); }
-.rtab:hover:not(.on) { background:var(--s3); color:var(--t2); }
+.rtab.on { background:var(--s1); color:var(--t1); box-shadow:var(--shadow-sm); font-weight:600; }
+.rtab:hover:not(.on) { color:var(--t1); }
 
-/* Sim controls */
-.sim-btn {
-  height:30px; padding:0 12px; border-radius:6px; border:1px solid;
-  font:600 12px 'Inter'; cursor:pointer; flex-shrink:0; display:flex; align-items:center; gap:5px;
-  transition:all .12s; white-space:nowrap;
+.btn {
+  height:32px; padding:0 13px; border-radius:7px; border:1px solid var(--b1);
+  font:600 12.5px 'Inter'; cursor:pointer; flex-shrink:0; display:flex; align-items:center; gap:6px;
+  transition:all .14s; white-space:nowrap; background:var(--s1); color:var(--t2);
 }
-.sim-btn.go  { background:rgba(63,185,80,.12); border-color:rgba(63,185,80,.4); color:var(--green); }
-.sim-btn.stop{ background:rgba(248,81,73,.12); border-color:rgba(248,81,73,.4); color:var(--red); }
-.sim-btn.neu { background:transparent; border-color:var(--b1); color:var(--t2); }
-.sim-btn.neu:hover { background:var(--s3); color:var(--t1); }
+.btn:hover { background:var(--s2); border-color:var(--b2); color:var(--t1); }
+.btn.go  { background:var(--green); border-color:var(--green); color:#fff; box-shadow:0 2px 8px rgba(22,163,74,.28); }
+.btn.go:hover { background:#15803d; }
+.btn.stop{ background:var(--red); border-color:var(--red); color:#fff; box-shadow:0 2px 8px rgba(220,38,38,.28); }
+.btn.stop:hover { background:#b91c1c; }
+.btn.icon { width:32px; padding:0; justify-content:center; }
 
 .sim-status {
-  margin-left:auto; display:flex; align-items:center; gap:8px;
-  font-family:'JetBrains Mono'; font-size:11px; flex-shrink:0;
+  margin-left:auto; display:flex; align-items:center; gap:10px;
+  font-family:'JetBrains Mono'; font-size:11.5px; flex-shrink:0; color:var(--t2);
 }
-.sled { width:6px; height:6px; border-radius:50%; background:var(--t3); }
-.sled.on { background:var(--green); box-shadow:0 0 8px var(--green); animation:blink 1s infinite; }
-@keyframes blink { 0%,100%{opacity:1}50%{opacity:.3} }
-#st-t { color:var(--cyan); }
-#st-fps { color:var(--t3); font-size:10px; }
+.sled { width:7px; height:7px; border-radius:50%; background:var(--b2); transition:all .3s; }
+.sled.on { background:var(--green); box-shadow:0 0 0 4px rgba(22,163,74,.18); animation:pulse 1.4s infinite; }
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 4px rgba(22,163,74,.18)} 50%{box-shadow:0 0 0 7px rgba(22,163,74,.08)} }
+#st-t { color:var(--blue); font-weight:600; }
+#st-fps { color:var(--t3); font-size:10.5px; }
 
-/* ── MAIN AREA ── */
+/* ── MAIN ── */
 #main { flex:1; display:flex; overflow:hidden; position:relative; }
 
 /* ── VIEWPORT ── */
 #vp { flex:1; position:relative; overflow:hidden; background:var(--bg); }
 #cv { display:block; width:100%; height:100%; }
 
-/* HUD Position */
 #hud-pos {
-  position:absolute; top:8px; left:8px;
-  background:rgba(22,27,34,.88); border:1px solid var(--b1);
-  border-radius:8px; padding:7px 10px; backdrop-filter:blur(12px);
-  font-size:11px; min-width:140px; pointer-events:none;
+  position:absolute; top:10px; left:10px;
+  background:rgba(255,255,255,.92); border:1px solid var(--b1);
+  border-radius:10px; padding:9px 12px; backdrop-filter:blur(10px);
+  font-size:11px; min-width:148px; pointer-events:none; box-shadow:var(--shadow-md);
 }
-.hud-title { font-size:9px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--t3); margin-bottom:4px; }
-.hud-row { display:flex; justify-content:space-between; gap:12px; margin-bottom:1px; }
+.hud-title { font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--t3); margin-bottom:5px; }
+.hud-row { display:flex; justify-content:space-between; gap:12px; margin-bottom:2px; }
 .hud-lbl { color:var(--t3); font-size:10px; }
-.hud-val { font-family:'JetBrains Mono'; font-size:11px; font-weight:500; }
+.hud-val { font-family:'JetBrains Mono'; font-size:11px; font-weight:600; }
 
-/* HUD Dynamics */
 #hud-dyn {
-  position:absolute; top:8px; left:160px;
-  background:rgba(22,27,34,.88); border:1px solid var(--b1);
-  border-radius:8px; padding:7px 10px; backdrop-filter:blur(12px);
-  font-size:11px; min-width:140px; pointer-events:none;
+  position:absolute; top:10px; left:168px;
+  background:rgba(255,255,255,.92); border:1px solid var(--b1);
+  border-radius:10px; padding:9px 12px; backdrop-filter:blur(10px);
+  font-size:11px; min-width:148px; pointer-events:none; box-shadow:var(--shadow-md);
 }
 @media (max-width:600px) {
-  #hud-pos { top:6px; left:6px; padding:5px 8px; min-width:auto; font-size:10px; }
-  #hud-dyn { top:6px; left:auto; right:6px; padding:5px 8px; min-width:auto; font-size:10px; }
+  #hud-pos { top:6px; left:6px; padding:6px 9px; min-width:auto; font-size:10px; }
+  #hud-dyn { top:6px; left:auto; right:6px; padding:6px 9px; min-width:auto; font-size:10px; }
   .hud-title { font-size:8px; margin-bottom:2px; }
   .hud-row { gap:8px; }
-  .hud-lbl { font-size:9px; }
-  .hud-val { font-size:10px; }
 }
 
-/* Trajectory panel */
 #traj-panel {
-  position:absolute; bottom:8px; right:8px;
-  background:rgba(22,27,34,.9); border:1px solid var(--b1);
-  border-radius:8px; padding:10px; backdrop-filter:blur(12px); width:130px;
+  position:absolute; bottom:10px; right:10px;
+  background:rgba(255,255,255,.94); border:1px solid var(--b1);
+  border-radius:10px; padding:11px; backdrop-filter:blur(10px); width:138px; box-shadow:var(--shadow-md);
 }
+.tp-title { font-size:9px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--t3); margin-bottom:8px; }
+.traj-btn {
+  display:block; width:100%; height:29px; margin-bottom:5px; border-radius:7px;
+  border:1px solid var(--b1); background:var(--s1); color:var(--t2);
+  font:600 11.5px 'Inter'; cursor:pointer; transition:all .14s;
+}
+.traj-btn:hover { background:var(--s2); color:var(--t1); }
+.traj-btn.on { background:var(--blue-l); border-color:#a9c5fb; color:var(--blue); }
+.clear-traj {
+  display:block; width:100%; height:25px; margin-top:6px; border-radius:7px;
+  border:1px solid #f5c2c2; background:var(--red-l); color:var(--red);
+  font:600 10px 'Inter'; cursor:pointer; transition:all .14s;
+}
+.clear-traj:hover { background:#fde2e2; }
+
 @media (max-width:600px) {
-  #traj-panel { width:148px; padding:6px; bottom:6px; right:6px; display:flex; flex-wrap:wrap; gap:4px; }
+  #traj-panel { width:148px; padding:7px; bottom:6px; right:6px; display:flex; flex-wrap:wrap; gap:5px; }
   #traj-panel .tp-title { display:none; }
   #traj-panel .traj-btn { width:auto; flex:1 1 40%; height:30px; margin-bottom:0; font-size:15px; padding:0; display:flex; align-items:center; justify-content:center; }
   #traj-panel .traj-btn span.lbl { display:none; }
   #traj-panel .clear-traj { flex:1 1 100%; margin-top:0; height:24px; font-size:9px; }
-  #traj-panel .clear-traj span.lbl { display:inline; }
-  #hint { display:none; }
 }
-.tp-title { font-size:9px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--t3); margin-bottom:7px; }
-.traj-btn {
-  display:block; width:100%; height:28px; margin-bottom:4px; border-radius:5px;
-  border:1px solid var(--b1); background:transparent; color:var(--t2);
-  font:500 11px 'Inter'; cursor:pointer; transition:all .12s;
-}
-.traj-btn:hover { background:var(--s3); color:var(--t1); }
-.traj-btn.on { background:rgba(88,166,255,.1); border-color:rgba(88,166,255,.4); color:var(--blue); }
-.clear-traj {
-  display:block; width:100%; height:24px; margin-top:6px; border-radius:5px;
-  border:1px solid rgba(248,81,73,.3); background:transparent; color:var(--red);
-  font:500 10px 'Inter'; cursor:pointer; transition:all .12s;
-}
-.clear-traj:hover { background:rgba(248,81,73,.1); }
 
-/* Help hint */
 #hint {
-  position:absolute; bottom:12px; left:50%; transform:translateX(-50%);
-  background:rgba(22,27,34,.8); border:1px solid var(--b1); border-radius:20px;
-  padding:5px 14px; font-size:11px; color:var(--t3); white-space:nowrap;
-  pointer-events:none; backdrop-filter:blur(10px);
+  position:absolute; bottom:10px; left:50%; transform:translateX(-50%);
+  background:rgba(255,255,255,.92); border:1px solid var(--b1); border-radius:20px;
+  padding:6px 14px; font-size:11px; color:var(--t2); white-space:nowrap;
+  pointer-events:none; backdrop-filter:blur(10px); box-shadow:var(--shadow-md);
 }
 @media (pointer:coarse) { #hint { display:none; } }
+@media (max-width:600px) { #hint { display:none; } }
+
+/* ── CONTROL COLUMN (desktop) ── */
+#ctrl-col {
+  width:250px; background:var(--s1); border-left:1px solid var(--b1);
+  display:flex; flex-direction:column; overflow-y:auto; flex-shrink:0;
+}
+#ctrl-col::-webkit-scrollbar { width:4px; }
+#ctrl-col::-webkit-scrollbar-thumb { background:var(--b2); border-radius:2px; }
+@media (max-width:1100px) { #ctrl-col { display:none; } }
+.ctrl-col-head {
+  padding:9px 14px; font-size:10px; font-weight:700; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--t3); border-bottom:1px solid var(--b1); flex-shrink:0;
+  background:var(--s2);
+}
 
 /* ── RIGHT PANEL (desktop) ── */
 #right {
-  width:270px; background:var(--s1); border-left:1px solid var(--b1);
+  width:280px; background:var(--s1); border-left:1px solid var(--b1);
   display:flex; flex-direction:column; overflow:hidden; flex-shrink:0;
 }
 @media (max-width:1100px) { #right { display:none; } }
 
-/* ── CONTROL PANEL (desktop, always visible) ── */
-#ctrl-col {
-  width:240px; background:var(--s1); border-left:1px solid var(--b1);
-  display:flex; flex-direction:column; overflow-y:auto; flex-shrink:0;
-}
-#ctrl-col::-webkit-scrollbar { width:3px; }
-#ctrl-col::-webkit-scrollbar-thumb { background:var(--b1); }
-@media (max-width:1100px) { #ctrl-col { display:none; } }
-.ctrl-col-head {
-  padding:7px 12px; font-size:10px; font-weight:600; letter-spacing:.1em;
-  text-transform:uppercase; color:var(--t3); border-bottom:1px solid var(--b1); flex-shrink:0;
-}
-
 .rhead {
-  padding:7px 12px; font-size:10px; font-weight:600; letter-spacing:.1em;
+  padding:9px 14px; font-size:10px; font-weight:700; letter-spacing:.08em;
   text-transform:uppercase; color:var(--t3); border-bottom:1px solid var(--b1);
   display:flex; justify-content:space-between; align-items:center; flex-shrink:0;
+  background:var(--s2);
 }
 .rhead-btn {
-  height:18px; padding:0 6px; border-radius:3px; border:1px solid var(--b1);
-  background:transparent; color:var(--t3); font:400 9px 'Inter'; cursor:pointer;
+  height:20px; padding:0 7px; border-radius:4px; border:1px solid var(--b1);
+  background:var(--s1); color:var(--t3); font:500 9px 'Inter'; cursor:pointer;
 }
-.rhead-btn:hover { color:var(--t2); border-color:var(--b2); }
+.rhead-btn:hover { color:var(--t1); border-color:var(--b2); }
 
-#eq { padding:9px 12px; overflow-y:auto; font-family:'JetBrains Mono'; font-size:10px; flex:0 0 auto; max-height:200px; }
-#eq::-webkit-scrollbar { width:3px; }
-#eq::-webkit-scrollbar-thumb { background:var(--b1); }
-.esec { margin-bottom:9px; }
-.esec-t { font-size:9px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--t3); margin-bottom:4px; font-family:'Inter'; }
-.eline { color:var(--t2); line-height:1.5; margin-bottom:2px; }
-.eline .n { color:var(--blue); }
+#eq { padding:10px 14px; overflow-y:auto; font-family:'JetBrains Mono'; font-size:10px; flex:0 0 auto; max-height:215px; }
+#eq::-webkit-scrollbar { width:4px; }
+#eq::-webkit-scrollbar-thumb { background:var(--b2); border-radius:2px; }
+.esec { margin-bottom:10px; }
+.esec-t { font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--blue); margin-bottom:4px; font-family:'Inter'; }
+.eline { color:var(--t2); line-height:1.55; margin-bottom:2px; }
+.eline .n { color:var(--t1); font-weight:600; }
 
-#telem { flex:1; overflow-y:auto; padding:8px 10px; display:grid; grid-template-columns:1fr 1fr; gap:6px; align-content:start; }
-#telem::-webkit-scrollbar { width:3px; }
-.tc { background:var(--bg); border:1px solid var(--s3); border-radius:6px; padding:7px 8px; }
-.tc-l { font-size:9px; color:var(--t3); font-weight:600; letter-spacing:.06em; text-transform:uppercase; margin-bottom:2px; }
-.tc-v { font-family:'JetBrains Mono'; font-size:13px; font-weight:600; }
+#telem { flex:1; overflow-y:auto; padding:9px 11px; display:grid; grid-template-columns:1fr 1fr; gap:7px; align-content:start; }
+#telem::-webkit-scrollbar { width:4px; }
+.tc { background:var(--s2); border:1px solid var(--b1); border-radius:8px; padding:8px 9px; transition:all .14s; }
+.tc:hover { border-color:var(--b2); box-shadow:var(--shadow-sm); }
+.tc-l { font-size:9px; color:var(--t3); font-weight:700; letter-spacing:.05em; text-transform:uppercase; margin-bottom:3px; }
+.tc-v { font-family:'JetBrains Mono'; font-size:14px; font-weight:700; }
 .tc-u { font-size:9px; color:var(--t3); }
 
-#osc-wrap { border-top:1px solid var(--b1); height:110px; display:flex; flex-direction:column; flex-shrink:0; }
+#osc-wrap { border-top:1px solid var(--b1); height:120px; display:flex; flex-direction:column; flex-shrink:0; }
 #osc { flex:1; width:100%; display:block; }
 
-/* ── BOTTOM PANEL (mobile) ── */
+/* ── BOTTOM PANEL (mobile/tablet) ── */
 #bottom {
   background:var(--s1); border-top:1px solid var(--b1);
   display:none; flex-direction:column; overflow:hidden;
   flex-shrink:0; max-height:55vh;
 }
 @media (max-width:1100px) { #bottom { display:flex; } }
-@media (min-width:769px) and (max-width:1100px) {
-  #bottom { max-height:38vh; }
-}
+@media (min-width:769px) and (max-width:1100px) { #bottom { max-height:40vh; } }
 
-/* Bottom tabs */
-.btabs { display:flex; border-bottom:1px solid var(--b1); flex-shrink:0; }
+.btabs { display:flex; border-bottom:1px solid var(--b1); flex-shrink:0; background:var(--s2); }
 .btab {
-  flex:1; height:38px; border:none; background:transparent; color:var(--t3);
-  font:500 11px 'Inter'; cursor:pointer; transition:all .12s;
+  flex:1; height:40px; border:none; background:transparent; color:var(--t3);
+  font:600 11px 'Inter'; cursor:pointer; transition:all .14s;
   border-bottom:2px solid transparent;
 }
-.btab.on { color:var(--blue); border-bottom-color:var(--blue); }
+.btab.on { color:var(--blue); border-bottom-color:var(--blue); background:var(--s1); }
 
 .bpanel { display:none; flex:1; overflow-y:auto; }
 .bpanel.on { display:block; }
-.bpanel::-webkit-scrollbar { width:3px; }
+.bpanel::-webkit-scrollbar { width:4px; }
 
-/* CONTROL PANEL */
-#ctrl-panel-mobile, #ctrl-panel-desktop, #const-panel-desktop, #const-panel-mobile { padding:12px; }
+#ctrl-panel-mobile, #ctrl-panel-desktop, #const-panel-desktop, #const-panel-mobile { padding:13px; }
 
-/* Constants editor */
-.const-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
-.const-card {
-  background:var(--bg); border:1px solid var(--b1); border-radius:7px; padding:8px 10px;
-}
-.const-label { font-size:10px; color:var(--t3); margin-bottom:4px; font-weight:500; }
+.const-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:13px; }
+.const-card { background:var(--s2); border:1px solid var(--b1); border-radius:8px; padding:9px 10px; }
+.const-label { font-size:10px; color:var(--t2); margin-bottom:5px; font-weight:600; }
 .const-input {
-  width:100%; background:var(--s3); border:1px solid var(--b1); border-radius:4px;
-  color:var(--t1); font:500 13px 'JetBrains Mono'; padding:4px 7px; outline:none;
+  width:100%; background:var(--s1); border:1px solid var(--b1); border-radius:5px;
+  color:var(--t1); font:600 13px 'JetBrains Mono'; padding:5px 7px; outline:none;
   text-align:center;
 }
-.const-input:focus { border-color:rgba(88,166,255,.5); }
-.const-unit { font-size:9px; color:var(--t3); text-align:center; margin-top:2px; }
+.const-input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.12); }
+.const-unit { font-size:9px; color:var(--t3); text-align:center; margin-top:3px; }
 
-/* Manual control buttons */
-.ctrl-title { font-size:10px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--t3); margin-bottom:8px; }
+.ctrl-title { font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--t3); margin-bottom:9px; }
 
-/* ROVER controls */
-.rover-ctrl { display:flex; flex-direction:column; align-items:center; gap:6px; }
-.dpad { display:grid; grid-template-columns:60px 60px 60px; grid-template-rows:60px 60px 60px; gap:5px; }
+.rover-ctrl { display:flex; flex-direction:column; align-items:center; gap:8px; }
+.dpad { display:grid; grid-template-columns:58px 58px 58px; grid-template-rows:58px 58px 58px; gap:5px; }
 .dpad-btn {
-  border-radius:10px; border:1px solid var(--b2); background:var(--s2);
-  color:var(--t2); font-size:20px; cursor:pointer; display:flex; align-items:center;
+  border-radius:11px; border:1px solid var(--b1); background:var(--s1);
+  color:var(--t2); font-size:19px; cursor:pointer; display:flex; align-items:center;
   justify-content:center; transition:all .1s; user-select:none; -webkit-user-select:none;
-  touch-action:none;
+  touch-action:none; box-shadow:var(--shadow-sm);
 }
-.dpad-btn:active, .dpad-btn.pressed { background:rgba(88,166,255,.2); border-color:var(--blue); color:var(--blue); transform:scale(.94); }
-.dpad-center { background:var(--s3); }
+.dpad-btn:active, .dpad-btn.pressed { background:var(--blue-l); border-color:#a9c5fb; color:var(--blue); transform:scale(.95); }
+.dpad-center { background:var(--s2); }
 
-/* ARM controls */
-.arm-ctrl { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-.joint-ctrl { background:var(--bg); border:1px solid var(--b1); border-radius:7px; padding:8px; }
-.jc-name { font-size:10px; color:var(--t2); font-weight:500; margin-bottom:6px; }
-.jc-val { font-family:'JetBrains Mono'; font-size:13px; color:var(--blue); margin-bottom:6px; text-align:center; }
+.arm-ctrl { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+.joint-ctrl { background:var(--s2); border:1px solid var(--b1); border-radius:9px; padding:9px; }
+.jc-name { font-size:10px; color:var(--t2); font-weight:600; margin-bottom:6px; }
+.jc-val { font-family:'JetBrains Mono'; font-size:13px; color:var(--blue); margin-bottom:7px; text-align:center; font-weight:600; }
 .jc-btns { display:flex; gap:5px; }
 .jc-btn {
-  flex:1; height:32px; border-radius:6px; border:1px solid var(--b1); background:var(--s2);
+  flex:1; height:32px; border-radius:7px; border:1px solid var(--b1); background:var(--s1);
   color:var(--t2); font-size:16px; cursor:pointer; transition:all .1s; touch-action:none;
 }
-.jc-btn:active { background:var(--s3); color:var(--t1); transform:scale(.95); }
+.jc-btn:active { background:var(--blue-l); color:var(--blue); transform:scale(.95); }
 
-/* DRONE controls */
-.drone-ctrl { display:flex; gap:12px; align-items:flex-start; padding:4px; }
-.drone-stick-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:6px; }
-.stick-label { font-size:10px; color:var(--t3); font-weight:600; letter-spacing:.08em; text-transform:uppercase; }
+.drone-ctrl { display:flex; gap:14px; align-items:flex-start; padding:4px; flex-wrap:wrap; }
+.drone-stick-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:7px; min-width:110px; }
+.stick-label { font-size:10px; color:var(--t3); font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
 .stick-zone {
-  width:120px; height:120px; border-radius:50%; border:2px solid var(--b2); background:var(--s2);
-  position:relative; cursor:pointer; touch-action:none;
+  width:118px; height:118px; border-radius:50%; border:2px solid var(--b1); background:var(--s2);
+  position:relative; cursor:pointer; touch-action:none; box-shadow:inset 0 2px 6px rgba(20,24,32,.06);
 }
 .stick-knob {
-  width:40px; height:40px; border-radius:50%; background:var(--blue);
-  box-shadow:0 0 12px rgba(88,166,255,.4); position:absolute;
+  width:42px; height:42px; border-radius:50%; background:var(--blue);
+  box-shadow:0 3px 10px rgba(37,99,235,.4); position:absolute;
   left:50%; top:50%; transform:translate(-50%,-50%);
   pointer-events:none; transition:box-shadow .1s;
 }
-.drone-alt-ctrl { display:flex; flex-direction:column; align-items:center; gap:6px; }
+.drone-alt-ctrl { display:flex; flex-direction:column; align-items:center; gap:7px; }
 .alt-btn {
-  width:50px; height:50px; border-radius:10px; border:1px solid var(--b2); background:var(--s2);
-  color:var(--t2); font-size:22px; cursor:pointer; display:flex; align-items:center;
-  justify-content:center; transition:all .1s; touch-action:none;
+  width:48px; height:48px; border-radius:10px; border:1px solid var(--b1); background:var(--s1);
+  color:var(--t2); font-size:21px; cursor:pointer; display:flex; align-items:center;
+  justify-content:center; transition:all .1s; touch-action:none; box-shadow:var(--shadow-sm);
 }
-.alt-btn:active { background:rgba(88,166,255,.2); border-color:var(--blue); color:var(--blue); transform:scale(.94); }
+.alt-btn:active { background:var(--blue-l); border-color:#a9c5fb; color:var(--blue); transform:scale(.95); }
 
-/* BIPED controls */
-.biped-ctrl { display:flex; flex-direction:column; align-items:center; gap:10px; }
+.biped-ctrl { display:flex; flex-direction:column; align-items:center; gap:11px; }
 .walk-btn {
-  width:100%; height:56px; border-radius:12px; border:2px solid var(--green);
-  background:rgba(63,185,80,.1); color:var(--green); font:600 15px 'Inter';
-  cursor:pointer; transition:all .12s; display:flex; align-items:center; justify-content:center; gap:8px;
+  width:100%; height:54px; border-radius:13px; border:2px solid var(--green);
+  background:var(--green-l); color:var(--green); font:700 14.5px 'Inter';
+  cursor:pointer; transition:all .14s; display:flex; align-items:center; justify-content:center; gap:8px;
 }
-.walk-btn.walking { background:rgba(63,185,80,.2); box-shadow:0 0 20px rgba(63,185,80,.3); }
+.walk-btn.walking { background:var(--green); color:#fff; box-shadow:0 4px 14px rgba(22,163,74,.3); }
 .biped-turn { display:flex; gap:8px; width:100%; }
 .turn-btn {
-  flex:1; height:44px; border-radius:10px; border:1px solid var(--b2); background:var(--s2);
-  color:var(--t2); font-size:22px; cursor:pointer; transition:all .1s; touch-action:none;
+  flex:1; height:42px; border-radius:10px; border:1px solid var(--b1); background:var(--s1);
+  color:var(--t2); font-size:20px; cursor:pointer; transition:all .1s; touch-action:none; box-shadow:var(--shadow-sm);
 }
-.turn-btn:active { background:var(--s3); color:var(--t1); transform:scale(.95); }
+.turn-btn:active { background:var(--blue-l); color:var(--blue); transform:scale(.95); }
 
-/* TELEM mobile */
-#telem-mobile { padding:8px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; }
-.tcm { background:var(--bg); border:1px solid var(--s3); border-radius:6px; padding:7px 8px; }
-.tcm-l { font-size:9px; color:var(--t3); font-weight:600; letter-spacing:.05em; text-transform:uppercase; margin-bottom:2px; }
-.tcm-v { font-family:'JetBrains Mono'; font-size:12px; font-weight:600; }
+#telem-mobile { padding:9px; display:grid; grid-template-columns:1fr 1fr 1fr; gap:7px; }
+.tcm { background:var(--s2); border:1px solid var(--b1); border-radius:8px; padding:8px 9px; }
+.tcm-l { font-size:9px; color:var(--t3); font-weight:700; letter-spacing:.04em; text-transform:uppercase; margin-bottom:3px; }
+.tcm-v { font-family:'JetBrains Mono'; font-size:12px; font-weight:700; }
 .tcm-u { font-size:8px; color:var(--t3); }
 
-/* EQ mobile */
-#eq-mobile { padding:10px 12px; font-family:'JetBrains Mono'; font-size:10px; }
+#eq-mobile { padding:11px 13px; font-family:'JetBrains Mono'; font-size:10px; }
 
-/* STATUSBAR */
+/* ── STATUSBAR ── */
 #sb {
-  height:22px; background:var(--bg); border-top:1px solid var(--b1);
-  display:flex; align-items:center; padding:0 12px; gap:14px;
+  height:24px; background:var(--s1); border-top:1px solid var(--b1);
+  display:flex; align-items:center; padding:0 14px; gap:16px;
   font-family:'JetBrains Mono'; font-size:9.5px; color:var(--t3);
   flex-shrink:0;
 }
-@media (max-width:768px) { #sb { display:none; } }
-.si { display:flex; gap:4px; } .sv { color:var(--t2); }
+@media (max-width:1100px) { #sb { display:none; } }
+.si { display:flex; gap:4px; } .sv { color:var(--t1); font-weight:600; }
 
-/* MODAL */
+/* ── MODAL ── */
 #modal {
-  position:fixed; inset:0; background:rgba(0,0,0,.65); backdrop-filter:blur(6px);
+  position:fixed; inset:0; background:rgba(28,33,40,.4); backdrop-filter:blur(4px);
   z-index:999; display:none; align-items:center; justify-content:center; padding:16px;
 }
 #modal.on { display:flex; }
 .mbox {
-  background:var(--s2); border:1px solid var(--b2); border-radius:10px;
-  padding:20px; width:100%; max-width:520px; max-height:80vh; display:flex; flex-direction:column;
+  background:var(--s1); border:1px solid var(--b1); border-radius:14px;
+  padding:22px; width:100%; max-width:540px; max-height:80vh; display:flex; flex-direction:column;
+  box-shadow:var(--shadow-lg);
 }
-.mttl { font-size:15px; font-weight:600; margin-bottom:10px; }
+.mttl { font-size:15px; font-weight:700; margin-bottom:11px; color:var(--t1); }
 .mbdy {
   font-family:'JetBrains Mono'; font-size:10.5px; white-space:pre;
-  overflow-y:auto; color:var(--t2); flex:1; margin-bottom:12px; line-height:1.6;
+  overflow-y:auto; color:var(--t2); flex:1; margin-bottom:13px; line-height:1.65;
+  background:var(--s2); border-radius:8px; padding:12px; border:1px solid var(--b1);
 }
 
-/* Touch feedback */
 @media (pointer:coarse) {
   .dpad-btn, .jc-btn, .alt-btn, .turn-btn { min-height:52px; min-width:52px; }
   .dpad { grid-template-columns:68px 68px 68px; grid-template-rows:68px 68px 68px; gap:6px; }
@@ -341,53 +348,50 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--t1); }
 <body>
 <div id="app">
 
-<!-- TOPBAR -->
-<div id="topbar">
-  <div class="logo"><div class="dot"></div>RoboSim</div>
-  <div class="sep"></div>
-  <div class="rtabs">
-    <button class="rtab on" id="rt-rover" onclick="App.setRobot('rover')">🚗 Rover</button>
-    <button class="rtab" id="rt-arm"   onclick="App.setRobot('arm')">🦾 Bras</button>
-    <button class="rtab" id="rt-drone" onclick="App.setRobot('drone')">🚁 Drone</button>
-    <button class="rtab" id="rt-biped" onclick="App.setRobot('biped')">🤖 Bipède</button>
+<nav>
+  <div class="logo">
+    <div class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="16" height="10" rx="2"/><circle cx="9" cy="14" r="1.4" fill="white" stroke="none"/><circle cx="15" cy="14" r="1.4" fill="white" stroke="none"/><path d="M12 9V5M9 5h6"/></svg></div>
+    RoboSim
   </div>
   <div class="sep"></div>
-  <button class="sim-btn go" id="btn-sim" onclick="App.toggleSim()">▶ Simuler</button>
-  <button class="sim-btn neu" onclick="App.resetRobot()">↺</button>
-  <button class="sim-btn neu" onclick="App.exportEq()">📄</button>
+  <div class="rtabs">
+    <button class="rtab on" id="rt-rover" onclick="App.setRobot('rover')">🚜 Rover</button>
+    <button class="rtab" id="rt-arm"   onclick="App.setRobot('arm')">🦾 Bras</button>
+    <button class="rtab" id="rt-drone" onclick="App.setRobot('drone')">🚁 Drone</button>
+    <button class="rtab" id="rt-biped" onclick="App.setRobot('biped')">🚶 Bipède</button>
+  </div>
+  <div class="sep"></div>
+  <button class="btn go" id="btn-sim" onclick="App.toggleSim()">▶ Simuler</button>
+  <button class="btn icon" onclick="App.resetRobot()" title="Réinitialiser">↺</button>
+  <button class="btn icon" onclick="App.exportEq()" title="Exporter">📄</button>
   <div class="sim-status">
     <div class="sled" id="sled"></div>
     <span id="st-lbl" style="color:var(--t3)">Arrêt</span>
     <span id="st-t">0.000s</span>
     <span id="st-fps">--fps</span>
   </div>
-</div>
+</nav>
 
-<!-- MAIN -->
 <div id="main">
 
-  <!-- VIEWPORT -->
   <div id="vp">
     <canvas id="cv"></canvas>
 
-    <!-- HUD Position -->
     <div id="hud-pos">
       <div class="hud-title">Position</div>
-      <div class="hud-row"><span class="hud-lbl">X</span><span class="hud-val" id="h-x" style="color:var(--red)">0.000 m</span></div>
-      <div class="hud-row"><span class="hud-lbl">Y</span><span class="hud-val" id="h-y" style="color:var(--green)">0.000 m</span></div>
-      <div class="hud-row"><span class="hud-lbl">Z</span><span class="hud-val" id="h-z" style="color:var(--blue)">0.000 m</span></div>
-      <div class="hud-row"><span class="hud-lbl">Cap</span><span class="hud-val" id="h-yaw" style="color:var(--amber)">0.0°</span></div>
+      <div class="hud-row"><span class="hud-lbl">X</span><span class="hud-val" id="h-x" style="color:#dc2626">0.000 m</span></div>
+      <div class="hud-row"><span class="hud-lbl">Y</span><span class="hud-val" id="h-y" style="color:#16a34a">0.000 m</span></div>
+      <div class="hud-row"><span class="hud-lbl">Z</span><span class="hud-val" id="h-z" style="color:#2563eb">0.000 m</span></div>
+      <div class="hud-row"><span class="hud-lbl">Cap</span><span class="hud-val" id="h-yaw" style="color:#b45309">0.0°</span></div>
     </div>
 
-    <!-- HUD Dynamics -->
     <div id="hud-dyn">
       <div class="hud-title">Dynamique</div>
-      <div class="hud-row"><span class="hud-lbl">V</span><span class="hud-val" id="h-vl" style="color:var(--cyan)">0.000 m/s</span></div>
-      <div class="hud-row"><span class="hud-lbl">ω</span><span class="hud-val" id="h-va" style="color:var(--purple)">0.0 °/s</span></div>
-      <div class="hud-row"><span class="hud-lbl">a</span><span class="hud-val" id="h-ac" style="color:var(--orange)">0.000 m/s²</span></div>
+      <div class="hud-row"><span class="hud-lbl">V</span><span class="hud-val" id="h-vl" style="color:#0891b2">0.000 m/s</span></div>
+      <div class="hud-row"><span class="hud-lbl">ω</span><span class="hud-val" id="h-va" style="color:#7c3aed">0.0 °/s</span></div>
+      <div class="hud-row"><span class="hud-lbl">a</span><span class="hud-val" id="h-ac" style="color:#ea580c">0.000 m/s²</span></div>
     </div>
 
-    <!-- Trajectoire -->
     <div id="traj-panel">
       <div class="tp-title">Trajectoire</div>
       <button class="traj-btn on" id="tj-manual" onclick="App.setTraj('manual')">🕹<span class="lbl"> Manuel</span></button>
@@ -400,15 +404,13 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--t1); }
     <div id="hint">Clic droit = orbiter · Molette = zoom · Alt+clic = pan</div>
   </div>
 
-  <!-- CONTROL COLUMN (desktop, always visible) -->
   <div id="ctrl-col">
     <div class="ctrl-col-head">Contrôle Manuel</div>
-    <div id="ctrl-panel-desktop" style="padding:12px"></div>
-    <div class="ctrl-col-head">Constantes</div>
-    <div id="const-panel-desktop" style="padding:12px"></div>
+    <div id="ctrl-panel-desktop"></div>
+    <div class="ctrl-col-head">Constantes Physiques</div>
+    <div id="const-panel-desktop"></div>
   </div>
 
-  <!-- RIGHT PANEL (desktop) -->
   <div id="right">
     <div class="rhead">Équations <button class="rhead-btn" onclick="App.exportEq()">↓ Export</button></div>
     <div id="eq"></div>
@@ -421,7 +423,6 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--t1); }
   </div>
 </div>
 
-<!-- BOTTOM PANEL (mobile + desktop ctrl) -->
 <div id="bottom">
   <div class="btabs">
     <button class="btab on" id="btab-ctrl" onclick="App.showBTab('ctrl')">🎮 Contrôle</button>
@@ -429,15 +430,14 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--t1); }
     <button class="btab" id="btab-telem" onclick="App.showBTab('telem')">📊 Télémétrie</button>
     <button class="btab" id="btab-eq"    onclick="App.showBTab('eq')">∫ Équations</button>
   </div>
-  <div class="bpanel on" id="bpanel-ctrl"><div id="ctrl-panel-mobile" style="padding:12px"></div></div>
-  <div class="bpanel" id="bpanel-const"><div id="const-panel-mobile" style="padding:12px"></div></div>
+  <div class="bpanel on" id="bpanel-ctrl"><div id="ctrl-panel-mobile"></div></div>
+  <div class="bpanel" id="bpanel-const"><div id="const-panel-mobile"></div></div>
   <div class="bpanel" id="bpanel-telem"><div id="telem-mobile"></div></div>
   <div class="bpanel" id="bpanel-eq"><div id="eq-mobile"></div></div>
 </div>
 
-<!-- STATUS -->
 <div id="sb">
-  <div class="si">Robot<span class="sv" id="sb-r"> Rover 4WD</span></div>
+  <div class="si">Robot<span class="sv" id="sb-r"> Rover Agricole</span></div>
   <div class="si">Mode<span class="sv" id="sb-m"> Manuel</span></div>
   <div class="si">DOF<span class="sv" id="sb-dof"> 4</span></div>
   <div class="si" style="margin-left:auto">t<span class="sv" id="sb-t"> 0.000s</span></div>
@@ -448,106 +448,107 @@ body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--t1); }
   <div class="mbox">
     <div class="mttl" id="m-t"></div>
     <div class="mbdy" id="m-b"></div>
-    <button class="sim-btn neu" style="align-self:flex-end" onclick="document.getElementById('modal').classList.remove('on')">Fermer</button>
+    <button class="btn" style="align-self:flex-end" onclick="document.getElementById('modal').classList.remove('on')">Fermer</button>
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-// THREE.JS INIT
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// SCENE THREE.JS — thème clair SolidWorks
+// ═══════════════════════════════════════════════════════
 const cv = document.getElementById('cv');
 const renderer = new THREE.WebGLRenderer({ canvas:cv, antialias:true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.3;
-renderer.setClearColor(0x0d1117, 1);
+renderer.toneMappingExposure = 1.0;
+renderer.setClearColor(0xf0f2f5, 1);
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x0d1117, 0.09);
+scene.fog = new THREE.Fog(0xf0f2f5, 4, 18);
+scene.background = new THREE.Color(0xf0f2f5);
 
-const camera = new THREE.PerspectiveCamera(45, 1, 0.001, 100);
+const camera = new THREE.PerspectiveCamera(42, 1, 0.001, 60);
 
-// Lights
-scene.add(new THREE.AmbientLight(0x8090b0, 0.18));
-scene.add(new THREE.HemisphereLight(0xb0c8ff, 0x1a2030, 0.4));
-const sun = new THREE.DirectionalLight(0xfff8f0, 2.8);
-sun.position.set(5, 10, 6);
+// Éclairage réaliste type studio/CAO
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+const hemi = new THREE.HemisphereLight(0xe8eeff, 0xd0d4dc, 0.5);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xffffff, 1.8);
+sun.position.set(6, 12, 8);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
-sun.shadow.camera.left=-3; sun.shadow.camera.right=3;
-sun.shadow.camera.top=3;   sun.shadow.camera.bottom=-3;
-sun.shadow.camera.near=0.1; sun.shadow.camera.far=30;
-sun.shadow.bias = -0.001;
+sun.shadow.camera.left = -3; sun.shadow.camera.right = 3;
+sun.shadow.camera.top = 3;   sun.shadow.camera.bottom = -3;
+sun.shadow.camera.near = 0.1; sun.shadow.camera.far = 30;
+sun.shadow.bias = -0.0008;
 scene.add(sun);
-const fill = new THREE.DirectionalLight(0x6090ff, 0.5);
-fill.position.set(-4, 3, -3);
-scene.add(fill);
+const fill1 = new THREE.DirectionalLight(0xddeeff, 0.6); fill1.position.set(-5, 4, -3); scene.add(fill1);
+const fill2 = new THREE.DirectionalLight(0xfff0e0, 0.3); fill2.position.set(3, 2, -6); scene.add(fill2);
 
-// Ground
-const gnd = new THREE.Mesh(new THREE.PlaneGeometry(40,40),
-  new THREE.MeshStandardMaterial({color:0x0d1117, roughness:.95, metalness:.02}));
-gnd.rotation.x = -Math.PI/2; gnd.receiveShadow = true;
-scene.add(gnd);
-const grid = new THREE.GridHelper(20, 40, 0x1e3a5f, 0x162030);
+// Sol clair avec grille subtile
+const groundMat = new THREE.MeshStandardMaterial({ color:0xe8eaee, roughness:.95, metalness:.0 });
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(30,30), groundMat);
+ground.rotation.x = -Math.PI/2; ground.receiveShadow = true;
+scene.add(ground);
+const grid = new THREE.GridHelper(20, 40, 0xc8ccd4, 0xdde0e5);
 grid.position.y = 0.001;
-grid.material.opacity = 0.6; grid.material.transparent = true;
 scene.add(grid);
-scene.add(new THREE.AxesHelper(0.35));
+// Axes XYZ
+const ax = new THREE.AxesHelper(0.4); ax.position.y=0.002; scene.add(ax);
 
-// Orbit camera
-const orb = { theta:0.6, phi:0.62, r:1.4, tx:0, ty:0.15, tz:0 };
+// Caméra orbitale
+const orb = { theta:0.55, phi:0.62, r:1.3, tx:0, ty:0.15, tz:0 };
 function updCam() {
   const{theta:t,phi:p,r,tx,ty,tz}=orb;
   camera.position.set(tx+r*Math.sin(p)*Math.sin(t), ty+r*Math.cos(p), tz+r*Math.sin(p)*Math.cos(t));
-  camera.lookAt(tx,ty,tz);
+  camera.lookAt(tx, ty, tz);
+  const el=document.getElementById('sb-t');
+  if(el) el.textContent=' '+G.simT.toFixed(3)+'s';
 }
-updCam();
 
-// Orbit mouse
-let orb_drag=false, orb_pan=false, orb_lx=0, orb_ly=0;
+// Contrôles souris
+let _drag=false, _pan=false, _lx=0, _ly=0;
 cv.addEventListener('mousedown', e => {
-  if(e.button===2){orb_drag=true;orb_lx=e.clientX;orb_ly=e.clientY;}
-  if(e.button===1||(e.button===0&&e.altKey)){orb_pan=true;orb_lx=e.clientX;orb_ly=e.clientY;}
+  if(e.button===2){_drag=true;_lx=e.clientX;_ly=e.clientY;}
+  if(e.button===1||(e.button===0&&e.altKey)){_pan=true;_lx=e.clientX;_ly=e.clientY;}
 });
 cv.addEventListener('mousemove', e => {
-  if(orb_drag){
-    orb.theta-=(e.clientX-orb_lx)*0.005;
-    orb.phi=Math.max(.06,Math.min(Math.PI*.47,orb.phi+(e.clientY-orb_ly)*0.005));
-    updCam(); orb_lx=e.clientX; orb_ly=e.clientY;
+  if(_drag){
+    orb.theta -= (e.clientX-_lx)*.005;
+    orb.phi = Math.max(.06,Math.min(Math.PI*.47, orb.phi+(e.clientY-_ly)*.005));
+    updCam(); _lx=e.clientX; _ly=e.clientY;
   }
-  if(orb_pan){
-    const dx=(e.clientX-orb_lx)*0.001*orb.r, dy=(e.clientY-orb_ly)*0.001*orb.r;
+  if(_pan){
+    const dx=(e.clientX-_lx)*.001*orb.r, dy=(e.clientY-_ly)*.001*orb.r;
     const fwd=new THREE.Vector3(orb.tx,0,orb.tz).sub(camera.position).normalize();
     const right=new THREE.Vector3().crossVectors(fwd,new THREE.Vector3(0,1,0)).normalize();
     orb.tx-=right.x*dx; orb.tz-=right.z*dx; orb.ty+=dy;
-    updCam(); orb_lx=e.clientX; orb_ly=e.clientY;
+    updCam(); _lx=e.clientX; _ly=e.clientY;
   }
 });
-cv.addEventListener('mouseup', ()=>{orb_drag=false;orb_pan=false;});
+cv.addEventListener('mouseup', ()=>{_drag=false;_pan=false;});
 cv.addEventListener('contextmenu', e=>e.preventDefault());
 cv.addEventListener('wheel', e=>{
   e.preventDefault();
-  orb.r=Math.max(0.1,Math.min(20,orb.r*(e.deltaY>0?1.1:0.91)));
+  orb.r=Math.max(.08,Math.min(20,orb.r*(e.deltaY>0?1.1:.91)));
   updCam();
 },{passive:false});
 
 // Touch orbit
-let tc0=null;
-cv.addEventListener('touchstart', e=>{if(e.touches.length===1){tc0={x:e.touches[0].clientX,y:e.touches[0].clientY};}}, {passive:true});
+let _tc=null;
+cv.addEventListener('touchstart', e=>{ if(e.touches.length===1) _tc={x:e.touches[0].clientX,y:e.touches[0].clientY}; },{passive:true});
 cv.addEventListener('touchmove', e=>{
-  if(e.touches.length===1&&tc0){
-    const dx=(e.touches[0].clientX-tc0.x)*0.007;
-    const dy=(e.touches[0].clientY-tc0.y)*0.007;
-    orb.theta-=dx; orb.phi=Math.max(.06,Math.min(Math.PI*.47,orb.phi+dy));
-    updCam(); tc0={x:e.touches[0].clientX,y:e.touches[0].clientY};
+  if(e.touches.length===1&&_tc){
+    orb.theta-=(e.touches[0].clientX-_tc.x)*.007;
+    orb.phi=Math.max(.06,Math.min(Math.PI*.47,orb.phi+(e.touches[0].clientY-_tc.y)*.007));
+    updCam(); _tc={x:e.touches[0].clientX,y:e.touches[0].clientY};
   }
-}, {passive:true});
-cv.addEventListener('touchend', ()=>{tc0=null;}, {passive:true});
+},{passive:true});
+cv.addEventListener('touchend',()=>_tc=null,{passive:true});
 
-function resizeAll() {
+function resizeAll(){
   const vp=document.getElementById('vp');
   renderer.setSize(vp.clientWidth, vp.clientHeight);
   camera.aspect=vp.clientWidth/vp.clientHeight;
@@ -557,577 +558,1024 @@ function resizeAll() {
 }
 window.addEventListener('resize', resizeAll);
 
-// ═══════════════════════════════════════════════
-// MESH BUILDERS
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// MATÉRIAUX PARTAGÉS — palette SolidWorks/industriel
+// ═══════════════════════════════════════════════════════
+function mat(col, rough=.4, metal=.0, emissive=null, emissInt=0){
+  const m=new THREE.MeshStandardMaterial({color:col, roughness:rough, metalness:metal});
+  if(emissive){m.emissive=new THREE.Color(emissive);m.emissiveIntensity=emissInt;}
+  return m;
+}
+const MAT={
+  alu:    mat(0xd8dce4,.25,.85),
+  aluDark:mat(0x9aa3b0,.30,.80),
+  aluBright:mat(0xeceff3,.20,.90),
+  steel:  mat(0xb0b8c4,.20,.90),
+  rubber: mat(0x282c30,.88,.04),
+  rubberDark:mat(0x1a1d20,.92,.02),
+  pcb:    mat(0x1e5c2a,.80,.05),
+  plastic:mat(0x3d4552,.50,.10),
+  plasticLight:mat(0xc8ccd4,.60,.05),
+  red:    mat(0xcc2200,.40,.20),
+  green:  mat(0x16a34a,.40,.10),
+  blue:   mat(0x2563eb,.35,.15),
+  yellow: mat(0xf59e0b,.40,.10),
+  orange: mat(0xea580c,.40,.10),
+  white:  mat(0xf8fafc,.70,.05),
+  glassBlue: new THREE.MeshStandardMaterial({color:0x224466,metalness:.5,roughness:.05,emissive:new THREE.Color(0x112233),emissiveIntensity:.3}),
+  ledGreen:  mat(0x22ff66,.1,.0,0x22ff66,1.5),
+  ledRed:    mat(0xff3300,.1,.0,0xff2200,1.2),
+  carbon: mat(0x1a1c1e,.55,.3),
+};
+
+// Helper mesh
 function M(geo,mat,x=0,y=0,z=0,rx=0,ry=0,rz=0){
   const m=new THREE.Mesh(geo,mat);
   m.position.set(x,y,z); m.rotation.set(rx,ry,rz);
   m.castShadow=true; m.receiveShadow=true;
   return m;
 }
-const mats={
-  dark:  ()=>new THREE.MeshStandardMaterial({color:0x1c2128,roughness:.45,metalness:.75}),
-  metal: ()=>new THREE.MeshStandardMaterial({color:0x3a3f4a,roughness:.30,metalness:.80}),
-  light: ()=>new THREE.MeshStandardMaterial({color:0xbbbbcc,roughness:.20,metalness:.90}),
-  red:   ()=>new THREE.MeshStandardMaterial({color:0xc0392b,roughness:.35,metalness:.65}),
-  tyre:  ()=>new THREE.MeshStandardMaterial({color:0x111111,roughness:.95,metalness:.01}),
-  pcb:   ()=>new THREE.MeshStandardMaterial({color:0x1a5c2a,roughness:.85,metalness:.05}),
-  gray:  ()=>new THREE.MeshStandardMaterial({color:0x444c56,roughness:.50,metalness:.70}),
-  limb:  ()=>new THREE.MeshStandardMaterial({color:0x3d4355,roughness:.45,metalness:.65}),
-  foot:  ()=>new THREE.MeshStandardMaterial({color:0x1a1a28,roughness:.8}),
-};
 
+// ═══════════════════════════════════════════════════════
+// ROBOT 1 — ROVER AGRICOLE 4WD
+// ═══════════════════════════════════════════════════════
 function buildRover(){
-  const g=new THREE.Group();
-  // Chassis
-  g.add(M(new THREE.BoxGeometry(.32,.045,.22),mats.metal()));
-  g.add(M(new THREE.BoxGeometry(.20,.008,.14),mats.pcb(),0,.028,0));
-  // Bords alu
-  [.14,-.14].forEach(ox=>g.add(M(new THREE.BoxGeometry(.005,.05,.22),mats.light(),ox,0,0)));
-  // 4 roues
+  const g = new THREE.Group();
+
+  // ══════════════════════════════════════════
+  // CHÂSSIS — profilés tubulaires soudés
+  // Style rover agricole / buggy tout-terrain
+  // ══════════════════════════════════════════
+
+  const matBody  = mat(0x2d3a2e,.45,.15);   // vert foncé agricole
+  const matFrame = mat(0x1e2820,.50,.30);   // cadre plus sombre
+  const matPanel = mat(0x3a4a3b,.40,.10);   // panneaux latéraux
+  const matBump  = mat(0x222822,.55,.25);   // pare-chocs
+  const matGlass = new THREE.MeshStandardMaterial({color:0x88aacc,roughness:.05,metalness:.1,transparent:true,opacity:.55});
+
+  // ── LONGERONS (2 tubes horizontaux, fond du châssis) ──
+  [.075,-.075].forEach(z=>{
+    g.add(M(new THREE.BoxGeometry(.38,.030,.030), matFrame, 0,.038,z));
+  });
+  // Traverses de liaison avant / milieu / arrière
+  [-0.16, 0, 0.16].forEach(x=>{
+    g.add(M(new THREE.BoxGeometry(.030,.030,.18), matFrame, x,.038,0));
+  });
+
+  // ── PLANCHER (tôle entre les longerons) ──
+  g.add(M(new THREE.BoxGeometry(.32,.008,.17), matPanel, 0,.052,0));
+
+  // ── CARROSSERIE PRINCIPALE ──
+  // Capot moteur avant (surélevé, incliné légèrement)
+  g.add(M(new THREE.BoxGeometry(.12,.055,.17), matBody, .10,.095,0));
+  // Capot arrière (coffre plat)
+  g.add(M(new THREE.BoxGeometry(.10,.035,.17), matBody, -.11,.078,0));
+  // Habitacle central (cabine)
+  g.add(M(new THREE.BoxGeometry(.14,.08,.17), matBody, -.005,.108,0));
+
+  // ── PARE-BRISE (vitre inclinée) ──
+  const windshield = M(new THREE.BoxGeometry(.008,.065,.15), matGlass, .068,.130,0);
+  windshield.rotation.z = -0.28;
+  g.add(windshield);
+  // Montant A (pilier de pare-brise)
+  [.075,-.075].forEach(z=>{
+    const pillar = M(new THREE.BoxGeometry(.010,.070,.010), matFrame, .062,.132,z);
+    pillar.rotation.z=-0.28;
+    g.add(pillar);
+  });
+
+  // ── TOIT ──
+  g.add(M(new THREE.BoxGeometry(.13,.012,.155), matBody, -.025,.172,0));
+
+  // ── FLANCS CARROSSERIE ──
+  // Flanc gauche
+  g.add(M(new THREE.BoxGeometry(.30,.065,.010), matPanel,  .005,.090, .085));
+  // Flanc droit
+  g.add(M(new THREE.BoxGeometry(.30,.065,.010), matPanel,  .005,.090,-.085));
+
+  // ── PARE-CHOCS AVANT ──
+  g.add(M(new THREE.BoxGeometry(.025,.040,.18), matBump, .195,.060,0));
+  // Grille de ventilation (barres horizontales)
+  for(let i=0;i<4;i++){
+    g.add(M(new THREE.BoxGeometry(.015,.006,.16), matFrame, .192,.042+i*.012,0));
+  }
+  // Phares avant intégrés
+  [.065,-.065].forEach(z=>{
+    g.add(M(new THREE.BoxGeometry(.014,.028,.042),
+      new THREE.MeshStandardMaterial({color:0xffffee,emissive:new THREE.Color(0xfff5aa),emissiveIntensity:.8,roughness:.1}),
+      .197,.068,z));
+    // Cadre phare
+    g.add(M(new THREE.BoxGeometry(.016,.032,.046), matBump, .195,.068,z));
+  });
+
+  // ── PARE-CHOCS ARRIÈRE ──
+  g.add(M(new THREE.BoxGeometry(.022,.036,.18), matBump, -.196,.058,0));
+  // Feux arrière
+  [.065,-.065].forEach(z=>{
+    g.add(M(new THREE.BoxGeometry(.012,.024,.034),
+      new THREE.MeshStandardMaterial({color:0xff2200,emissive:new THREE.Color(0xff1100),emissiveIntensity:.7,roughness:.1}),
+      -.197,.064,z));
+  });
+
+  // ── ARCEAU DE SÉCURITÉ (ROPS) ──
+  // Montants verticaux
+  [.055,-.055].forEach(z=>{
+    g.add(M(new THREE.BoxGeometry(.014,.100,.014), matFrame, -.028,.155,z));
+  });
+  // Barre horizontale du haut
+  g.add(M(new THREE.BoxGeometry(.014,.014,.124), matFrame, -.028,.205,0));
+  // Diagonales
+  [.055,-.055].forEach(z=>{
+    const diag=M(new THREE.BoxGeometry(.012,.080,.012), matFrame, .010,.155,z);
+    diag.rotation.z=0.35;
+    g.add(diag);
+  });
+
+  // ── PANNEAU SOLAIRE (sur le toit) ──
+  g.add(M(new THREE.BoxGeometry(.115,.006,.138), MAT.pcb, -.022,.181,0));
+  for(let ix=-1;ix<=1;ix++) for(let iz=-1;iz<=1;iz++){
+    g.add(M(new THREE.BoxGeometry(.034,.003,.042),
+      new THREE.MeshStandardMaterial({color:0x080e1e,roughness:.08,metalness:.5,
+        emissive:new THREE.Color(0x081840),emissiveIntensity:.25}),
+      -.022+ix*.037,.185,iz*.044));
+  }
+
+  // ── ROUES — vraies roues cylindriques (inchangées) ──
+  const wheelPos=[
+    {x:.145, z:.115},
+    {x:.145, z:-.115},
+    {x:-.145,z:.115},
+    {x:-.145,z:-.115},
+  ];
   const wheels=[];
-  [[.12,.005,.13],[.12,.005,-.13],[-.12,.005,.13],[-.12,.005,-.13]].forEach(([wx,wy,wz])=>{
-    const wg=new THREE.Group(); wg.position.set(wx,wy,wz);
-    const tyre=M(new THREE.CylinderGeometry(.048,.048,.042,24),mats.tyre());
-    tyre.rotation.x=Math.PI/2; wg.add(tyre);
-    const rim=M(new THREE.CylinderGeometry(.030,.030,.044,8),mats.gray());
-    rim.rotation.x=Math.PI/2; wg.add(rim);
+
+  wheelPos.forEach(({x:wx,z:wz})=>{
+    const rollPivot=new THREE.Group();
+    rollPivot.position.set(wx, .075, wz);
+    g.add(rollPivot);
+
+    const tyreR=.075, tyreW=.060, rimR=.048, hubR=.018;
+
+    // Pneu
+    rollPivot.add(M(new THREE.CylinderGeometry(tyreR, tyreR, tyreW, 16), MAT.rubberDark, 0,0,0, Math.PI/2,0,0));
+    rollPivot.add(M(new THREE.CylinderGeometry(tyreR*.97, tyreR*.97, tyreW*.7, 8, 1, false), MAT.rubber, 0,0,0, Math.PI/2, Math.PI/8,0));
+    [-1,1].forEach(s=>rollPivot.add(M(new THREE.CylinderGeometry(tyreR, tyreR*.88, .005, 20), MAT.rubber, 0,0,s*(tyreW/2+.002), Math.PI/2,0,0)));
+
+    // Jante
+    rollPivot.add(M(new THREE.CylinderGeometry(rimR, rimR, tyreW*.88, 16), MAT.aluBright, 0,0,0, Math.PI/2,0,0));
+    [-1,1].forEach(s=>rollPivot.add(M(new THREE.CylinderGeometry(rimR*.98, rimR*.98, .005, 16), MAT.alu, 0,0,s*(tyreW/2-.004), Math.PI/2,0,0)));
+
+    // Rayons
     for(let i=0;i<5;i++){
-      const sp=M(new THREE.CylinderGeometry(.004,.004,.040,5),mats.light());
-      sp.rotation.x=Math.PI/2; sp.rotation.z=(i/5)*Math.PI*2;
-      sp.position.set(Math.cos((i/5)*Math.PI*2)*.018,Math.sin((i/5)*Math.PI*2)*.018,0);
-      wg.add(sp);
+      const a=(i/5)*Math.PI*2;
+      const spoke=new THREE.Mesh(new THREE.BoxGeometry(tyreW*.28, .007, rimR*.85), MAT.aluBright);
+      spoke.position.set(0, Math.cos(a)*(rimR*.42), Math.sin(a)*(rimR*.42));
+      spoke.rotation.set(a,0,0);
+      rollPivot.add(spoke);
     }
-    g.add(wg); wheels.push(wg);
+
+    // Moyeu + boulons
+    rollPivot.add(M(new THREE.CylinderGeometry(hubR, hubR, tyreW*.92, 12), MAT.steel, 0,0,0, Math.PI/2,0,0));
+    for(let i=0;i<4;i++){
+      const a=(i/4)*Math.PI*2;
+      [-1,1].forEach(s=>rollPivot.add(M(new THREE.CylinderGeometry(.004,.004,.007,6), MAT.steel,
+        0, Math.cos(a)*hubR*.55, Math.sin(a)*hubR*.55+s*(tyreW/2-.002), Math.PI/2,0,0)));
+    }
+    wheels.push(rollPivot);
   });
   g.userData.wheels=wheels;
-  // Mast + cam
-  g.add(M(new THREE.CylinderGeometry(.007,.007,.14,8),mats.metal(),.07,.1,0));
-  const camG=new THREE.Group(); camG.position.set(.07,.175,0);
-  camG.add(M(new THREE.BoxGeometry(.044,.025,.032),mats.dark()));
-  const lens=M(new THREE.CylinderGeometry(.009,.011,.015,12),mats.dark(),0,0,.022,Math.PI/2,0,0);
-  camG.add(lens);
-  g.add(camG); g.userData.camHead=camG;
-  // Antenne
-  g.add(M(new THREE.CylinderGeometry(.003,.003,.09,6),mats.light(),-.1,.085,.04));
-  g.add(M(new THREE.SphereGeometry(.004,6,6),new THREE.MeshStandardMaterial({color:0xff3333,emissive:0xff0000,emissiveIntensity:.4}),-.1,.13,.04));
-  // Bras irrigation
-  g.add(M(new THREE.CylinderGeometry(.005,.005,.24,8),mats.metal(),-.04,.025,0,0,0,Math.PI/2));
-  g.add(M(new THREE.CylinderGeometry(.006,.003,.025,8),mats.gray(),-.16,.025,0));
-  // Boitier elec
-  g.add(M(new THREE.BoxGeometry(.06,.022,.045),mats.dark(),0,.03,-.04));
+
+  // Essieux (courts, entre le châssis et l'intérieur des roues seulement)
+  [[.145],[-.145]].forEach(([x])=>{
+    g.add(M(new THREE.CylinderGeometry(.008,.008,.12,8), MAT.steel, x,.075,0, 0,0,Math.PI/2));
+  });
+
+  // ── MÂT CAMÉRA (sur le toit) ──
+  g.add(M(new THREE.CylinderGeometry(.008,.010,.055,8), MAT.steel, .020,.185,0));
+  const camGroup=new THREE.Group(); camGroup.position.set(.020,.218,0);
+  camGroup.add(M(new THREE.BoxGeometry(.040,.024,.030), MAT.plastic));
+  camGroup.add(M(new THREE.CylinderGeometry(.010,.012,.016,14), MAT.aluDark, 0,0,.022, Math.PI/2,0,0));
+  camGroup.add(M(new THREE.CylinderGeometry(.006,.006,.004,10), MAT.glassBlue, 0,0,.031, Math.PI/2,0,0));
+  camGroup.add(M(new THREE.SphereGeometry(.003,6,6), MAT.ledGreen, .012,.012,.015));
+  g.add(camGroup); g.userData.camHead=camGroup;
+
+  // ── ANTENNE GPS (sur arceau) ──
+  g.add(M(new THREE.CylinderGeometry(.003,.003,.060,6), MAT.alu, -.028,.218,.040));
+  g.add(M(new THREE.SphereGeometry(.008,8,8), MAT.white, -.028,.280,.040));
+  const beacon=M(new THREE.SphereGeometry(.004,6,6), MAT.ledRed, -.028,.280,.040);
+  g.add(beacon); g.userData.beacon=beacon;
+
+  // ── BRAS IRRIGATION (monté sur flanc arrière) ──
+  const irrigG=new THREE.Group(); irrigG.position.set(-.165,.095,-.090);
+  irrigG.add(M(new THREE.CylinderGeometry(.007,.007,.18,8), MAT.alu, 0,0,0, 0,Math.PI/2,0));
+  irrigG.add(M(new THREE.CylinderGeometry(.008,.004,.025,8), MAT.aluDark, .090,0,0, 0,0,.4));
+  irrigG.add(M(new THREE.CylinderGeometry(.003,.003,.008,6), MAT.green, .100,.012,0));
+  g.add(irrigG); g.userData.irrigG=irrigG;
+
   return g;
 }
 
+// ═══════════════════════════════════════════════════════
+// ROBOT 2 — BRAS ROBOTIQUE 6-DOF (style industriel)
+// ═══════════════════════════════════════════════════════
 function buildArm(){
   const g=new THREE.Group();
-  g.add(M(new THREE.CylinderGeometry(.11,.13,.045,32),mats.gray()));
-  g.add(M(new THREE.CylinderGeometry(.085,.085,.018,32),mats.metal(),0,.032,0));
-  const j1=new THREE.Group(); j1.position.y=.045; g.add(j1); g.userData.j1=j1;
-  j1.add(M(new THREE.CylinderGeometry(.065,.065,.055,24),mats.dark()));
-  const j2=new THREE.Group(); j2.position.set(0,.06,0); j1.add(j2); g.userData.j2=j2;
-  j2.add(M(new THREE.CylinderGeometry(.052,.052,.040,16),mats.red(),0,0,0,Math.PI/2,0,0));
+
+  // Socle vissé au sol
+  g.add(M(new THREE.CylinderGeometry(.13,.15,.04,32), mat(0x606875,.35,.7)));
+  g.add(M(new THREE.CylinderGeometry(.11,.11,.015,32), MAT.alu, 0,.030,0));
+  // Boulons de fixation
+  for(let i=0;i<6;i++){
+    const a=(i/6)*Math.PI*2;
+    g.add(M(new THREE.CylinderGeometry(.006,.006,.05,8), MAT.steel, Math.cos(a)*.115,.01,Math.sin(a)*.115));
+  }
+
+  // J1 — Rotation de base (yaw)
+  const j1=new THREE.Group(); j1.position.y=.04; g.add(j1); g.userData.j1=j1;
+  j1.add(M(new THREE.CylinderGeometry(.072,.072,.06,28), mat(0x3d4552,.40,.65)));
+  j1.add(M(new THREE.CylinderGeometry(.075,.075,.008,28), MAT.alu, 0,.034,0));
+  j1.add(M(new THREE.CylinderGeometry(.075,.075,.008,28), MAT.alu, 0,-.034,0));
+
+  // J2 — Épaule (pitch)
+  const j2=new THREE.Group(); j2.position.set(0,.065,0); j1.add(j2); g.userData.j2=j2;
+  // Servo housing
+  j2.add(M(new THREE.CylinderGeometry(.058,.058,.045,20), MAT.red, 0,0,0, Math.PI/2,0,0));
+  j2.add(M(new THREE.CylinderGeometry(.062,.062,.008,20), MAT.alu, .026,0,0, Math.PI/2,0,0));
+  j2.add(M(new THREE.CylinderGeometry(.062,.062,.008,20), MAT.alu, -.026,0,0, Math.PI/2,0,0));
+  // Lien 1 (bras haut)
   const l1=new THREE.Group(); j2.add(l1);
-  l1.add(M(new THREE.BoxGeometry(.052,.24,.052),mats.metal(),0,.12,0));
-  const j3=new THREE.Group(); j3.position.y=.24; l1.add(j3); g.userData.j3=j3;
-  j3.add(M(new THREE.CylinderGeometry(.044,.044,.038,16),mats.red(),0,0,0,Math.PI/2,0,0));
+  l1.add(M(new THREE.BoxGeometry(.058,.26,.058), mat(0x4a5568,.38,.6), 0,.13,0));
+  // Nervures
+  [-1,1].forEach(s=>l1.add(M(new THREE.BoxGeometry(.062,.24,.010), MAT.aluDark, 0,.13,s*.03)));
+
+  // J3 — Coude (pitch)
+  const j3=new THREE.Group(); j3.position.y=.26; l1.add(j3); g.userData.j3=j3;
+  j3.add(M(new THREE.CylinderGeometry(.048,.048,.040,20), MAT.red, 0,0,0, Math.PI/2,0,0));
+  j3.add(M(new THREE.CylinderGeometry(.052,.052,.006,20), MAT.alu, .022,0,0, Math.PI/2,0,0));
+  j3.add(M(new THREE.CylinderGeometry(.052,.052,.006,20), MAT.alu, -.022,0,0, Math.PI/2,0,0));
+  // Lien 2 (avant-bras)
   const l2=new THREE.Group(); j3.add(l2);
-  l2.add(M(new THREE.BoxGeometry(.044,.20,.044),mats.metal(),0,.10,0));
-  const j4=new THREE.Group(); j4.position.y=.20; l2.add(j4); g.userData.j4=j4;
-  j4.add(M(new THREE.CylinderGeometry(.034,.034,.034,16),mats.dark()));
-  const j5=new THREE.Group(); j5.position.y=.034; j4.add(j5); g.userData.j5=j5;
-  j5.add(M(new THREE.CylinderGeometry(.028,.028,.028,16),mats.red(),0,0,0,Math.PI/2,0,0));
+  l2.add(M(new THREE.BoxGeometry(.050,.22,.050), mat(0x4a5568,.38,.6), 0,.11,0));
+  [-1,1].forEach(s=>l2.add(M(new THREE.BoxGeometry(.054,.20,.008), MAT.aluDark, 0,.11,s*.027)));
+
+  // J4 — Rotation poignet (roll)
+  const j4=new THREE.Group(); j4.position.y=.22; l2.add(j4); g.userData.j4=j4;
+  j4.add(M(new THREE.CylinderGeometry(.038,.038,.038,20), mat(0x3d4552,.4,.65)));
+  j4.add(M(new THREE.CylinderGeometry(.040,.040,.006,20), MAT.alu, 0,.020,0));
+
+  // J5 — Poignet pitch
+  const j5=new THREE.Group(); j5.position.y=.040; j4.add(j5); g.userData.j5=j5;
+  j5.add(M(new THREE.CylinderGeometry(.032,.032,.030,16), MAT.red, 0,0,0, Math.PI/2,0,0));
+  // Lien 3
   const l3=new THREE.Group(); j5.add(l3);
-  l3.add(M(new THREE.BoxGeometry(.030,.11,.030),mats.metal(),0,.055,0));
-  const j6=new THREE.Group(); j6.position.y=.11; l3.add(j6); g.userData.j6=j6;
-  const f1=new THREE.Group(),f2=new THREE.Group();
-  f1.add(M(new THREE.BoxGeometry(.010,.044,.010),mats.metal(),.012,0,0));
-  f2.add(M(new THREE.BoxGeometry(.010,.044,.010),mats.metal(),-.012,0,0));
-  j6.add(f1); j6.add(f2); g.userData.finger1=f1; g.userData.finger2=f2;
-  const tcp=M(new THREE.SphereGeometry(.007,10,10),new THREE.MeshStandardMaterial({color:0x58a6ff,emissive:0x58a6ff,emissiveIntensity:.5}),0,.05,0);
+  l3.add(M(new THREE.BoxGeometry(.034,.12,.034), mat(0x4a5568,.38,.6), 0,.06,0));
+
+  // J6 — Effecteur / Pince
+  const j6=new THREE.Group(); j6.position.y=.12; l3.add(j6); g.userData.j6=j6;
+  j6.add(M(new THREE.CylinderGeometry(.028,.028,.020,14), mat(0x3d4552,.4,.65)));
+  // Doigts de pince
+  const f1=new THREE.Group(); f1.position.set(.012,0,0); j6.add(f1); g.userData.finger1=f1;
+  f1.add(M(new THREE.BoxGeometry(.011,.048,.012), mat(0x607080,.35,.7), 0,.024,0));
+  f1.add(M(new THREE.BoxGeometry(.008,.012,.010), MAT.rubber, 0,.048,0));
+  const f2=new THREE.Group(); f2.position.set(-.012,0,0); j6.add(f2); g.userData.finger2=f2;
+  f2.add(M(new THREE.BoxGeometry(.011,.048,.012), mat(0x607080,.35,.7), 0,.024,0));
+  f2.add(M(new THREE.BoxGeometry(.008,.012,.010), MAT.rubber, 0,.048,0));
+  // Point TCP
+  const tcp=M(new THREE.SphereGeometry(.007,10,10), new THREE.MeshStandardMaterial({color:0x2563eb,emissive:new THREE.Color(0x2563eb),emissiveIntensity:.6,roughness:.2}), 0,.062,0);
   j6.add(tcp);
+
+  // Câbles décoratifs (tube le long du bras)
+  const cableMat=new THREE.MeshStandardMaterial({color:0x1a1a2e,roughness:.8});
+  g.add(M(new THREE.CylinderGeometry(.005,.005,.25,8), cableMat, .032,.17,-.025, .05,0,.02));
+
   return g;
 }
 
+// ═══════════════════════════════════════════════════════
+// ROBOT 3 — DRONE QUADRIROTOR
+// ═══════════════════════════════════════════════════════
 function buildDrone(){
   const g=new THREE.Group();
-  const cf=new THREE.MeshStandardMaterial({color:0x1a1a2e,roughness:.4,metalness:.75});
-  const mM=new THREE.MeshStandardMaterial({color:0x2a2a3e,roughness:.3,metalness:.8});
-  const pM=new THREE.MeshStandardMaterial({color:0x252535,roughness:.6,metalness:.2,transparent:true,opacity:.82});
-  g.add(M(new THREE.BoxGeometry(.16,.022,.04),cf));
-  g.add(M(new THREE.BoxGeometry(.04,.022,.16),cf));
-  g.add(M(new THREE.BoxGeometry(.075,.028,.075),cf));
-  g.add(M(new THREE.BoxGeometry(.055,.010,.055),new THREE.MeshStandardMaterial({color:0x1a3355,roughness:.8}),0,.02,0));
+
+  // Bras en carbone (+)
+  const armMat=new THREE.MeshStandardMaterial({color:0x1e2028,roughness:.45,metalness:.6});
+  g.add(M(new THREE.BoxGeometry(.28,.016,.038), armMat));
+  g.add(M(new THREE.BoxGeometry(.038,.016,.28), armMat));
+  // Corps central (octogone)
+  g.add(M(new THREE.CylinderGeometry(.068,.072,.030,8), mat(0x2d3444,.42,.55)));
+  g.add(M(new THREE.CylinderGeometry(.072,.072,.004,8), MAT.alu, 0,.017,0));
+  g.add(M(new THREE.CylinderGeometry(.072,.072,.004,8), MAT.alu, 0,-.017,0));
+  // Flight controller (board visible)
+  g.add(M(new THREE.BoxGeometry(.050,.008,.050), MAT.pcb, 0,.020,0));
+  g.add(M(new THREE.BoxGeometry(.034,.012,.034), mat(0x1a1a2e,.4,.3), 0,.025,0));
+  // LED centrale
+  g.add(M(new THREE.SphereGeometry(.004,8,8), MAT.ledGreen, 0,.032,0));
+
+  // 4 moteurs + hélices
+  const motorPos=[[.11,0,.11],[.11,0,-.11],[-.11,0,.11],[-.11,0,-.11]];
   const props=[];
-  [[.08,0,.08],[.08,0,-.08],[-.08,0,.08],[-.08,0,-.08]].forEach(([mx,,mz],i)=>{
-    g.add(M(new THREE.CylinderGeometry(.016,.016,.026,16),mM,mx,0,mz));
-    g.add(M(new THREE.CylinderGeometry(.013,.013,.010,8),new THREE.MeshStandardMaterial({color:0xc0392b}),mx,.018,mz));
-    const pg=new THREE.Group(); pg.position.set(mx,.024,mz);
-    pg.add(M(new THREE.BoxGeometry(.13,.004,.018),pM));
-    pg.add(M(new THREE.BoxGeometry(.018,.004,.13),pM));
-    g.add(pg); props.push(pg);
+  motorPos.forEach(([mx,,mz],i)=>{
+    // Support moteur
+    g.add(M(new THREE.CylinderGeometry(.018,.018,.010,12), mat(0x222530,.5,.7), mx,-.004,mz));
+    // Corps moteur brushless
+    const motorG=new THREE.Group();
+    motorG.position.set(mx,.009,mz);
+    motorG.add(M(new THREE.CylinderGeometry(.019,.019,.028,20), mat(0x2a2d38,.35,.8)));
+    motorG.add(M(new THREE.CylinderGeometry(.021,.021,.006,20), mat(0x999faa,.2,.9), 0,.017,0));
+    // Cloche moteur (partie tournante)
+    motorG.add(M(new THREE.CylinderGeometry(.020,.020,.016,20), mat(0x404550,.3,.75), 0,.024,0));
+    g.add(motorG);
+
+    // Groupe hélice (tourne)
+    const propG=new THREE.Group();
+    propG.position.set(mx,.036,mz);
+    // 2 pales par hélice (profil aérodynamique)
+    [0,Math.PI].forEach(a=>{
+      const blade=new THREE.Group();
+      blade.rotation.y=a;
+      // Pale principale
+      blade.add(M(new THREE.BoxGeometry(.120,.004,.022), mat(0x1a1c22,.6,.2), .06,0,0));
+      // Bout de pale arrondi
+      blade.add(M(new THREE.SphereGeometry(.011,.8,6), mat(0x1a1c22,.6,.2), .122,0,0));
+      propG.add(blade);
+    });
+    // Centre hélice
+    propG.add(M(new THREE.CylinderGeometry(.009,.009,.012,10), mat(0x555d6a,.3,.7)));
+    g.add(propG);
+    props.push(propG);
   });
   g.userData.props=props;
-  [[.06,0,.06],[.06,0,-.06],[-.06,0,.06],[-.06,0,-.06]].forEach(([lx,,lz])=>{
-    g.add(M(new THREE.CylinderGeometry(.004,.004,.06,6),cf,lx,-.04,lz));
+
+  // ── Train d'atterrissage ──
+  const lgMat=mat(0x2d3444,.45,.5);
+  [[.09,0,.09],[.09,0,-.09],[-.09,0,.09],[-.09,0,-.09]].forEach(([lx,,lz])=>{
+    g.add(M(new THREE.CylinderGeometry(.006,.006,.062,8), lgMat, lx,-.038,lz));
   });
-  g.add(M(new THREE.BoxGeometry(.16,.004,.04),cf,0,-.07,0));
-  g.add(M(new THREE.BoxGeometry(.04,.004,.16),cf,0,-.07,0));
-  g.add(M(new THREE.BoxGeometry(.028,.020,.020),new THREE.MeshStandardMaterial({color:0x0a0a0a,roughness:.3,metalness:.6}),0,-.024,0));
+  // Patins
+  g.add(M(new THREE.BoxGeometry(.20,.007,.018), lgMat, 0,-.072,0));
+  g.add(M(new THREE.BoxGeometry(.018,.007,.20), lgMat, 0,-.072,0));
+  // Amortisseurs
+  [[.09,.09],[.09,-.09],[-.09,.09],[-.09,-.09]].forEach(([lx,lz])=>{
+    g.add(M(new THREE.CylinderGeometry(.004,.006,.020,6), MAT.red, lx,-.052,lz));
+  });
+
+  // ── Caméra gimbal 2 axes ──
+  const gimbalMat=mat(0x222530,.4,.6);
+  g.add(M(new THREE.BoxGeometry(.006,.038,.006), gimbalMat, .026,-.028,0));
+  g.add(M(new THREE.BoxGeometry(.006,.038,.006), gimbalMat, -.026,-.028,0));
+  g.add(M(new THREE.BoxGeometry(.062,.006,.006), gimbalMat, 0,-.010,0));
+  // Corps caméra
+  const camDrone=M(new THREE.BoxGeometry(.030,.022,.022), gimbalMat, 0,-.032,0);
+  g.add(camDrone);
+  g.add(M(new THREE.CylinderGeometry(.009,.011,.014,12), gimbalMat, 0,-.032,.015, Math.PI/2,0,0));
+  g.add(M(new THREE.CylinderGeometry(.006,.006,.004,12), MAT.glassBlue, 0,-.032,.023, Math.PI/2,0,0));
+
+  // LED de navigation
+  g.add(M(new THREE.SphereGeometry(.004,8,8), new THREE.MeshStandardMaterial({color:0xff2200,emissive:new THREE.Color(0xff1100),emissiveIntensity:1.2}), .12,-.001,.0));
+  g.add(M(new THREE.SphereGeometry(.004,8,8), new THREE.MeshStandardMaterial({color:0x00ee22,emissive:new THREE.Color(0x00cc22),emissiveIntensity:1.2}), -.12,-.001,.0));
+  g.add(M(new THREE.SphereGeometry(.004,8,8), new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xffffff),emissiveIntensity:1.5}), .0,-.001,.12));
+  g.add(M(new THREE.SphereGeometry(.004,8,8), new THREE.MeshStandardMaterial({color:0xffffff,emissive:new THREE.Color(0xffffff),emissiveIntensity:1.5}), .0,-.001,-.12));
+
   return g;
 }
 
+// ═══════════════════════════════════════════════════════
+// ROBOT 4 — ROBOT BIPÈDE HUMANOÏDE
+// ═══════════════════════════════════════════════════════
 function buildBiped(){
   const g=new THREE.Group();
-  function add(geo,mat,x=0,y=0,z=0,rx=0,ry=0,rz=0,p=g){const m=M(geo,mat,x,y,z,rx,ry,rz);p.add(m);return m;}
+  const bodyMat=mat(0x3d4552,.42,.55);
+  const jMat=MAT.red;
+  const limbMat=mat(0x4a5568,.40,.50);
+  const footMat=mat(0x2d3444,.65,.35);
+  const faceMat=new THREE.MeshStandardMaterial({color:0x1a2030,roughness:.25,metalness:.5,emissive:new THREE.Color(0x0a2060),emissiveIntensity:.4});
+
+  function add(geo,mat,x=0,y=0,z=0,rx=0,ry=0,rz=0,p=g){
+    const m=M(geo,mat,x,y,z,rx,ry,rz); p.add(m); return m;
+  }
+
+  // ── TORSE ──
   const torsoG=new THREE.Group(); torsoG.position.y=.55; g.add(torsoG); g.userData.torso=torsoG;
-  add(new THREE.BoxGeometry(.13,.19,.085),mats.dark(),0,0,0,0,0,0,torsoG);
-  add(new THREE.SphereGeometry(.062,.16,.16),mats.dark(),0,.165,0,0,0,0,torsoG);
-  add(new THREE.BoxGeometry(.042,.018,.026),new THREE.MeshStandardMaterial({color:0x39d0d8,emissive:0x39d0d8,emissiveIntensity:.4,metalness:.5}),0,.158,.058,0,0,0,torsoG);
+  add(new THREE.BoxGeometry(.14,.20,.09), bodyMat, 0,0,0, 0,0,0, torsoG);
+  // Nervures latérales
+  [-1,1].forEach(s=>add(new THREE.BoxGeometry(.006,.18,.092), MAT.aluDark, s*.07,0,0, 0,0,0, torsoG));
+  // Panneau avant avec détails
+  add(new THREE.BoxGeometry(.08,.10,.004), mat(0x2d3444,.5,.4), 0,.02,.047, 0,0,0, torsoG);
+  add(new THREE.BoxGeometry(.06,.006,.006), MAT.ledGreen, 0,.06,.050, 0,0,0, torsoG);
+  add(new THREE.BoxGeometry(.06,.006,.006), new THREE.MeshStandardMaterial({color:0x2563eb,emissive:new THREE.Color(0x2563eb),emissiveIntensity:.8}), 0,.048,.050, 0,0,0, torsoG);
+
+  // ── TÊTE ──
+  const headG=new THREE.Group(); headG.position.set(0,.220,0); torsoG.add(headG);
+  add(new THREE.BoxGeometry(.095,.090,.085), bodyMat, 0,0,0, 0,0,0, headG);
+  // Cou
+  add(new THREE.CylinderGeometry(.022,.025,.030,12), limbMat, 0,-.060,0, 0,0,0, headG);
+  // Visière/écran
+  add(new THREE.BoxGeometry(.080,.040,.010), faceMat, 0,.010,.043, 0,0,0, headG);
+  // "Yeux" LED (scanline)
+  add(new THREE.BoxGeometry(.028,.012,.005), new THREE.MeshStandardMaterial({color:0x00d4ff,emissive:new THREE.Color(0x00aadd),emissiveIntensity:1.0}), .018,.012,.048, 0,0,0, headG);
+  add(new THREE.BoxGeometry(.028,.012,.005), new THREE.MeshStandardMaterial({color:0x00d4ff,emissive:new THREE.Color(0x00aadd),emissiveIntensity:1.0}), -.018,.012,.048, 0,0,0, headG);
+  // Antenne
+  add(new THREE.CylinderGeometry(.003,.003,.040,6), MAT.alu, .030,.060,0, 0,0,0, headG);
+  add(new THREE.SphereGeometry(.005,6,6), MAT.ledRed, .030,.082,0, 0,0,0, headG);
+
+  // ── ÉPAULES / BRAS ──
   [-1,1].forEach(side=>{
-    const sh=new THREE.Group(); sh.position.set(side*.1,.04,0); torsoG.add(sh);
-    add(new THREE.CylinderGeometry(.020,.020,.012,12),mats.red(),0,0,0,0,0,Math.PI/2,sh);
-    add(new THREE.BoxGeometry(.030,.12,.030),mats.limb(),0,-.07,0,0,0,0,sh);
-    add(new THREE.BoxGeometry(.025,.10,.025),mats.limb(),0,-.19,0,0,0,0,sh);
+    const sh=new THREE.Group(); sh.position.set(side*.095,.065,0); torsoG.add(sh);
+    add(new THREE.CylinderGeometry(.022,.022,.014,16), jMat, 0,0,0, 0,0,Math.PI/2, sh);
+    const ua=new THREE.Group(); ua.position.set(side*.018,0,0); sh.add(ua);
+    add(new THREE.BoxGeometry(.026,.13,.026), limbMat, 0,-.068,0, 0,0,0, ua);
+    add(new THREE.CylinderGeometry(.018,.018,.012,14), jMat, 0,-.138,0, 0,0,Math.PI/2, ua);
+    add(new THREE.BoxGeometry(.022,.10,.022), limbMat, 0,-.196,0, 0,0,0, ua);
+    // Main
+    add(new THREE.BoxGeometry(.028,.030,.018), limbMat, 0,-.254,0, 0,0,0, ua);
   });
+
+  // ── BASSIN ──
   const pelvis=new THREE.Group(); pelvis.position.y=.46; g.add(pelvis);
-  add(new THREE.BoxGeometry(.115,.052,.072),mats.dark(),0,0,0,0,0,0,pelvis);
-  // Jambe G
-  const legLG=new THREE.Group(); legLG.position.set(.032,-.03,0); pelvis.add(legLG); g.userData.legLG=legLG;
-  add(new THREE.CylinderGeometry(.020,.020,.012,12),mats.red(),0,0,0,Math.PI/2,0,0,legLG);
-  const thL=new THREE.Group(); thL.position.y=-.03; legLG.add(thL);
-  add(new THREE.BoxGeometry(.038,.22,.038),mats.limb(),0,-.11,0,0,0,0,thL);
-  const knLG=new THREE.Group(); knLG.position.y=-.23; thL.add(knLG); g.userData.knLG=knLG;
-  add(new THREE.CylinderGeometry(.018,.018,.012,12),mats.red(),0,0,0,Math.PI/2,0,0,knLG);
+  add(new THREE.BoxGeometry(.120,.055,.080), bodyMat, 0,0,0, 0,0,0, pelvis);
+  [-1,1].forEach(s=>add(new THREE.BoxGeometry(.006,.050,.082), MAT.aluDark, s*.060,0,0, 0,0,0, pelvis));
+
+  // ── JAMBE GAUCHE ──
+  const legLG=new THREE.Group(); legLG.position.set(.034,-.034,0); pelvis.add(legLG); g.userData.legLG=legLG;
+  add(new THREE.CylinderGeometry(.022,.022,.014,16), jMat, 0,0,0, Math.PI/2,0,0, legLG);
+  const thL=new THREE.Group(); thL.position.y=-.030; legLG.add(thL);
+  add(new THREE.BoxGeometry(.042,.225,.042), limbMat, 0,-.114,0, 0,0,0, thL);
+  [-1,1].forEach(s=>add(new THREE.BoxGeometry(.008,.210,.044), MAT.aluDark, s*.024,-.114,0, 0,0,0, thL));
+  const knLG=new THREE.Group(); knLG.position.y=-.238; thL.add(knLG); g.userData.knLG=knLG;
+  add(new THREE.CylinderGeometry(.020,.020,.014,16), jMat, 0,0,0, Math.PI/2,0,0, knLG);
   const shL=new THREE.Group(); knLG.add(shL);
-  add(new THREE.BoxGeometry(.032,.19,.032),mats.limb(),0,-.095,0,0,0,0,shL);
-  const ankLG=new THREE.Group(); ankLG.position.y=-.19; shL.add(ankLG); g.userData.ankLG=ankLG;
-  add(new THREE.BoxGeometry(.040,.018,.072),mats.foot(),0,-.012,.010,0,0,0,ankLG);
-  // Jambe D
-  const legRG=new THREE.Group(); legRG.position.set(-.032,-.03,0); pelvis.add(legRG); g.userData.legRG=legRG;
-  add(new THREE.CylinderGeometry(.020,.020,.012,12),mats.red(),0,0,0,Math.PI/2,0,0,legRG);
-  const thR=new THREE.Group(); thR.position.y=-.03; legRG.add(thR);
-  add(new THREE.BoxGeometry(.038,.22,.038),mats.limb(),0,-.11,0,0,0,0,thR);
-  const knRG=new THREE.Group(); knRG.position.y=-.23; thR.add(knRG); g.userData.knRG=knRG;
-  add(new THREE.CylinderGeometry(.018,.018,.012,12),mats.red(),0,0,0,Math.PI/2,0,0,knRG);
+  add(new THREE.BoxGeometry(.036,.200,.036), limbMat, 0,-.100,0, 0,0,0, shL);
+  [-1,1].forEach(s=>add(new THREE.BoxGeometry(.007,.185,.037), MAT.aluDark, s*.020,-.100,0, 0,0,0, shL));
+  const ankLG=new THREE.Group(); ankLG.position.y=-.202; shL.add(ankLG); g.userData.ankLG=ankLG;
+  add(new THREE.CylinderGeometry(.016,.016,.012,14), jMat, 0,0,0, Math.PI/2,0,0, ankLG);
+  add(new THREE.BoxGeometry(.044,.020,.080), footMat, 0,-.018,.012, 0,0,0, ankLG);
+  // Semelle
+  add(new THREE.BoxGeometry(.040,.006,.074), MAT.rubber, 0,-.030,.010, 0,0,0, ankLG);
+
+  // ── JAMBE DROITE ──
+  const legRG=new THREE.Group(); legRG.position.set(-.034,-.034,0); pelvis.add(legRG); g.userData.legRG=legRG;
+  add(new THREE.CylinderGeometry(.022,.022,.014,16), jMat, 0,0,0, Math.PI/2,0,0, legRG);
+  const thR=new THREE.Group(); thR.position.y=-.030; legRG.add(thR);
+  add(new THREE.BoxGeometry(.042,.225,.042), limbMat, 0,-.114,0, 0,0,0, thR);
+  [-1,1].forEach(s=>add(new THREE.BoxGeometry(.008,.210,.044), MAT.aluDark, s*.024,-.114,0, 0,0,0, thR));
+  const knRG=new THREE.Group(); knRG.position.y=-.238; thR.add(knRG); g.userData.knRG=knRG;
+  add(new THREE.CylinderGeometry(.020,.020,.014,16), jMat, 0,0,0, Math.PI/2,0,0, knRG);
   const shR=new THREE.Group(); knRG.add(shR);
-  add(new THREE.BoxGeometry(.032,.19,.032),mats.limb(),0,-.095,0,0,0,0,shR);
-  const ankRG=new THREE.Group(); ankRG.position.y=-.19; shR.add(ankRG); g.userData.ankRG=ankRG;
-  add(new THREE.BoxGeometry(.040,.018,.072),mats.foot(),0,-.012,.010,0,0,0,ankRG);
+  add(new THREE.BoxGeometry(.036,.200,.036), limbMat, 0,-.100,0, 0,0,0, shR);
+  [-1,1].forEach(s=>add(new THREE.BoxGeometry(.007,.185,.037), MAT.aluDark, s*.020,-.100,0, 0,0,0, shR));
+  const ankRG=new THREE.Group(); ankRG.position.y=-.202; shR.add(ankRG); g.userData.ankRG=ankRG;
+  add(new THREE.CylinderGeometry(.016,.016,.012,14), jMat, 0,0,0, Math.PI/2,0,0, ankRG);
+  add(new THREE.BoxGeometry(.044,.020,.080), footMat, 0,-.018,.012, 0,0,0, ankRG);
+  add(new THREE.BoxGeometry(.040,.006,.074), MAT.rubber, 0,-.030,.010, 0,0,0, ankRG);
+
   return g;
 }
 
-// ═══════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// ÉTAT GLOBAL
+// ═══════════════════════════════════════════════════════
 let robotMesh=null, trajLine=null;
 const trajPts=[];
 
 const G={
   robot:'rover', simOn:false, simT:0, simIv:null,
   traj:'manual', trajT:0,
-  fps:0,_fc:0,_ft:Date.now(),
-  state:{x:0,z:0,y:0,yaw:0,vlin:0,vang:0,accel:0,prevVl:0,dist:0,alt:0,vz:0,walkPhase:0,yawAng:0,joints:{}},
-  // CONSTANTES modifiables par robot
-  consts:{
-    rover:{ vmax:{l:'V max',v:2,mn:.1,mx:5,u:'m/s'}, vamax:{l:'ω max',v:120,mn:10,mx:360,u:'°/s'}, accel:{l:'Accél.',v:3,mn:.5,mx:10,u:'m/s²'}, L:{l:'Voie',v:0.26,mn:.05,mx:.8,u:'m'}, r:{l:'Rayon roue',v:0.048,mn:.01,mx:.15,u:'m'} },
-    arm:  { spd:{l:'Vitesse',v:60,mn:5,mx:300,u:'°/s'}, L1:{l:'Long. L1',v:0.24,mn:.05,mx:.8,u:'m'}, L2:{l:'Long. L2',v:0.20,mn:.05,mx:.8,u:'m'}, L3:{l:'Long. L3',v:0.13,mn:.02,mx:.5,u:'m'} },
-    drone:{ mass:{l:'Masse',v:0.5,mn:.1,mx:5,u:'kg'}, thrust_coef:{l:'Coef. poussée',v:1.25,mn:.8,mx:2,u:''}, vmax_horiz:{l:'V horiz max',v:8,mn:1,mx:20,u:'m/s'}, drag:{l:'Traînée',v:.2,mn:0,mx:1,u:''} },
-    biped:{ walk_spd:{l:'Vitesse marche',v:.32,mn:.05,mx:1.5,u:'m/s'}, step_freq:{l:'Fréq. pas',v:2.2,mn:.5,mx:5,u:'Hz'}, step_amp:{l:'Amplitude',v:28,mn:5,mx:50,u:'°'} },
+  fps:0, _fc:0, _ft:Date.now(),
+  state:{
+    x:0,z:0,y:0,yaw:0,
+    vlin:0, vang:0, accel:0,
+    prevVl:0, dist:0,
+    alt:0, vz:0,
+    walkPhase:0, yawAng:0,
+    pitch:0, roll:0,
+    t:0, joints:{}
   },
-  // Touches maintenues
+  consts:{
+    rover:{
+      vmax:  {l:'V max',       v:2.0,  mn:.1,  mx:6,    u:'m/s'},
+      vamax: {l:'ω max',       v:120,  mn:10,  mx:360,  u:'°/s'},
+      accel: {l:'Accél.',      v:3.0,  mn:.5,  mx:15,   u:'m/s²'},
+      damp:  {l:'Amortissement',v:.85, mn:.1,  mx:.99,  u:''},
+      L:     {l:'Voie',        v:.26,  mn:.05, mx:.8,   u:'m'},
+      r:     {l:'Rayon roue',  v:.054, mn:.01, mx:.15,  u:'m'},
+    },
+    arm:{
+      spd:   {l:'Vitesse jts', v:80,   mn:5,   mx:300,  u:'°/s'},
+      L1:    {l:'Longueur L1', v:.26,  mn:.05, mx:.8,   u:'m'},
+      L2:    {l:'Longueur L2', v:.22,  mn:.05, mx:.8,   u:'m'},
+      L3:    {l:'Longueur L3', v:.14,  mn:.02, mx:.5,   u:'m'},
+    },
+    drone:{
+      mass:  {l:'Masse',       v:.55,  mn:.1,  mx:5,    u:'kg'},
+      kT:    {l:'Coef. poussée',v:1.3, mn:.8,  mx:2.5,  u:''},
+      drag:  {l:'Traînée',     v:.25,  mn:0,   mx:1,    u:''},
+      vhMax: {l:'V horiz max', v:8,    mn:1,   mx:20,   u:'m/s'},
+    },
+    biped:{
+      wSpd:  {l:'V. marche',   v:.35,  mn:.05, mx:1.5,  u:'m/s'},
+      freq:  {l:'Fréq. pas',   v:2.0,  mn:.5,  mx:5,    u:'Hz'},
+      amp:   {l:'Amplitude',   v:30,   mn:5,   mx:55,   u:'°'},
+    },
+  },
   keys:{up:false,down:false,left:false,right:false},
 };
 
-// ═══════════════════════════════════════════════
-// ROBOTS
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// ROBOTS — physique + animation + équations
+// ═══════════════════════════════════════════════════════
 const ROBOTS={
+
   rover:{
     name:'Rover Agricole 4WD', dof:4,
+    defaults:{ vlin:0,vang:0,camP:0,camT:0,pump:0 },
     build(){ return buildRover(); },
-    focus(){ orb.tx=0;orb.ty=.15;orb.tz=0;orb.r=1.4;orb.phi=.62;updCam(); },
+    focus(){ orb.tx=0;orb.ty=.12;orb.tz=0;orb.r=1.3;orb.phi=.60;updCam(); },
+
     kinematic(s,dt){
       const C=G.consts.rover;
-      // Appliquer accélération
-      const vl_tgt=s.joints.vlin||0;
-      s.vlin=(s.vlin||0)+(vl_tgt-s.vlin||0)*Math.min(1,C.accel.v*dt);
-      const va=(s.joints.vang||0)*Math.PI/180;
-      s.yaw+=va*dt; s.x+=Math.cos(s.yaw)*s.vlin*dt; s.z+=Math.sin(s.yaw)*s.vlin*dt;
-      s.vang=s.joints.vang||0; s.accel=(s.vlin-(s.prevVl||0))/dt; s.prevVl=s.vlin;
+      const vlTarget=s.joints.vlin||0;
+      const vaTarget=(s.joints.vang||0)*Math.PI/180;
+      s.vlin=(s.vlin||0)+(vlTarget-(s.vlin||0))*Math.min(1,C.accel.v*dt);
+      s.omega=(s.omega||0)*C.damp.v+vaTarget*(1-C.damp.v);
+      s.yaw=(s.yaw||0)+s.omega*dt;
+      s.x=(s.x||0)+Math.cos(s.yaw)*s.vlin*dt;
+      s.z=(s.z||0)+Math.sin(s.yaw)*s.vlin*dt;
+      s.vang=s.omega*180/Math.PI;
+      s.accel=(s.vlin-(s.prevVl||0))/Math.max(dt,.001);
+      s.prevVl=s.vlin;
       s.dist=(s.dist||0)+Math.abs(s.vlin)*dt;
     },
+
     animate(g,s,dt){
-      g.position.set(s.x,0,s.z); g.rotation.y=-s.yaw;
-      const wR=(s.vlin||0)/G.consts.rover.r.v*dt;
-      g.userData.wheels?.forEach(w=>{ w.children[0].rotation.z+=wR; });
-      if(g.userData.camHead){ g.userData.camHead.rotation.y=(s.joints.camP||0)*Math.PI/180; g.userData.camHead.rotation.x=-(s.joints.camT||0)*Math.PI/180; }
+      g.position.set(s.x||0,0,s.z||0);
+      g.rotation.y = -s.yaw;
+      // Tangage dynamique (transfert de masse à l'accélération)
+      g.rotation.x = Math.max(-.06,Math.min(.06,-(s.accel||0)*.012));
+      // Roulis en virage
+      g.rotation.z = Math.max(-.04,Math.min(.04,(s.omega||0)*-.08));
+      // Roues — rotation autour de Z (axe perpendiculaire à l'avancement)
+      const wR = (s.vlin||0)/G.consts.rover.r.v*dt;
+      g.userData.wheels?.forEach(w=>{ w.rotation.z -= wR; });
+      // Caméra
+      if(g.userData.camHead){
+        g.userData.camHead.rotation.y=(s.joints.camP||0)*Math.PI/180;
+        g.userData.camHead.rotation.x=-(s.joints.camT||0)*Math.PI/180;
+      }
+      // Beacon clignotant
+      if(g.userData.beacon) g.userData.beacon.material.emissiveIntensity=.6+Math.sin(s.t*6)*.6;
+      // Bras irrigation oscillant si pompe active
+      if(g.userData.irrigG) g.userData.irrigG.rotation.y=(s.joints.pump||0)>0?Math.sin(s.t*3)*.12:0;
     },
+
+    applyKeys(s,keys,dt){
+      // Si le joystick analogique est actif, il gère déjà les joints directement
+      if(App._roverStickActive) return;
+      const C=G.consts.rover;
+      const anyKey=keys.up||keys.down||keys.left||keys.right;
+      if(anyKey){
+        s.joints.vlin=keys.up?C.vmax.v:keys.down?-C.vmax.v*.6:0;
+        s.joints.vang=keys.left?-C.vamax.v:keys.right?C.vamax.v:0;
+      } else {
+        // Retour doux à zéro si plus de touche
+        s.joints.vlin*=.85;
+        s.joints.vang*=.80;
+        if(Math.abs(s.joints.vlin)<.01) s.joints.vlin=0;
+        if(Math.abs(s.joints.vang)<.5)  s.joints.vang=0;
+      }
+    },
+
     autoTraj(s,traj,t){
       const C=G.consts.rover;
-      if(traj==='circle'){ s.joints.vlin=C.vmax.v*.5; s.joints.vang=C.vamax.v*.35; }
-      if(traj==='square'){ const ph=Math.floor(t/2.5)%4,inT=(t%2.5)>1.8; s.joints.vlin=inT?.05:C.vmax.v*.6; s.joints.vang=inT?C.vamax.v*.8:0; }
-      if(traj==='fig8'){ s.joints.vlin=C.vmax.v*.45; s.joints.vang=Math.sin(t)*C.vamax.v*.55; }
+      if(traj==='circle'){s.joints.vlin=C.vmax.v*.55;s.joints.vang=C.vamax.v*.38;}
+      if(traj==='square'){const ph=Math.floor(t/2.5)%4,inT=(t%2.5)>1.9;s.joints.vlin=inT?.1:C.vmax.v*.65;s.joints.vang=inT?C.vamax.v*.9:0;}
+      if(traj==='fig8'){s.joints.vlin=C.vmax.v*.50;s.joints.vang=Math.sin(t)*C.vamax.v*.6;}
     },
-    applyKeys(s,keys,dt){
-      const C=G.consts.rover;
-      const v=keys.up?C.vmax.v:keys.down?-C.vmax.v*0.6:0;
-      const va=keys.left?-C.vamax.v:keys.right?C.vamax.v:0;
-      s.joints.vlin=v; s.joints.vang=va;
-    },
+
     equations(s){
-      const C=G.consts.rover,vl=s.vlin||0,va=(s.vang||0)*Math.PI/180;
+      const C=G.consts.rover,vl=s.vlin||0,om=s.omega||0;
       return [
-        ['Cinématique Différentielle',
-          `ẋ = v·cos(θ)   = ${(vl*Math.cos(s.yaw)).toFixed(4)} m/s`,
-          `ż = v·sin(θ)   = ${(vl*Math.sin(s.yaw)).toFixed(4)} m/s`,
-          `θ̇ = ω          = ${va.toFixed(4)} rad/s`],
-        ['Vitesse Roues',
-          `ω_G = (v-ω·L/2)/r = ${((vl-va*C.L.v/2)/C.r.v).toFixed(3)} rad/s`,
-          `ω_D = (v+ω·L/2)/r = ${((vl+va*C.L.v/2)/C.r.v).toFixed(3)} rad/s`,
+        ['Modèle Cinématique Différentiel',
+          `ẋ = v·cos(θ)      = ${(vl*Math.cos(s.yaw||0)).toFixed(4)} m/s`,
+          `ż = v·sin(θ)      = ${(vl*Math.sin(s.yaw||0)).toFixed(4)} m/s`,
+          `θ̇ = ω             = ${om.toFixed(4)} rad/s`],
+        ['Vitesse des Roues',
+          `ω_G = (v-ω·L/2)/r = ${((vl-om*C.L.v/2)/C.r.v).toFixed(3)} rad/s`,
+          `ω_D = (v+ω·L/2)/r = ${((vl+om*C.L.v/2)/C.r.v).toFixed(3)} rad/s`,
           `L=${C.L.v}m  r=${C.r.v}m`],
-        ['Position',
-          `x=${s.x.toFixed(4)}m  z=${s.z.toFixed(4)}m`,
-          `θ=${(s.yaw*180/Math.PI).toFixed(2)}°`,
-          `d=${(s.dist||0).toFixed(3)}m parcourus`],
+        ['Jacobien J(q)',
+          `J = |cos(θ) -sin(θ) 0|`,
+          `    |sin(θ)  cos(θ) 0|`,
+          `    |  0        0   1|`],
+        ['État',
+          `x=${(s.x||0).toFixed(4)}m  z=${(s.z||0).toFixed(4)}m`,
+          `θ=${((s.yaw||0)*180/Math.PI).toFixed(2)}°  d=${(s.dist||0).toFixed(2)}m`],
       ];
     },
+
     telem(s){
       return [
-        {l:'Vitesse',v:(s.vlin||0).toFixed(2),u:'m/s',c:'#39d0d8'},
-        {l:'V. ang.',v:(s.vang||0).toFixed(1),u:'°/s',c:'#bc8cff'},
-        {l:'Pos X',v:(s.x||0).toFixed(3),u:'m',c:'#f85149'},
-        {l:'Pos Z',v:(s.z||0).toFixed(3),u:'m',c:'#3fb950'},
-        {l:'Cap θ',v:((s.yaw||0)*180/Math.PI).toFixed(1),u:'°',c:'#d29922'},
-        {l:'Accél.',v:(s.accel||0).toFixed(3),u:'m/s²',c:'#f0883e'},
-        {l:'Distance',v:(s.dist||0).toFixed(2),u:'m',c:'#58a6ff'},
-        {l:'Pump',v:(s.joints?.pump||0).toFixed(0),u:'%',c:'#3fb950'},
+        {l:'Vitesse',  v:(s.vlin||0).toFixed(2),  u:'m/s', c:'#0891b2'},
+        {l:'V. ang.',  v:((s.omega||0)*180/Math.PI).toFixed(1), u:'°/s', c:'#7c3aed'},
+        {l:'Pos X',    v:(s.x||0).toFixed(3),      u:'m',   c:'#dc2626'},
+        {l:'Pos Z',    v:(s.z||0).toFixed(3),      u:'m',   c:'#16a34a'},
+        {l:'Cap θ',    v:((s.yaw||0)*180/Math.PI).toFixed(1), u:'°', c:'#b45309'},
+        {l:'Accél.',   v:(s.accel||0).toFixed(3),  u:'m/s²',c:'#ea580c'},
+        {l:'Distance', v:(s.dist||0).toFixed(2),   u:'m',   c:'#2563eb'},
+        {l:'Pompe',    v:(s.joints?.pump||0).toFixed(0), u:'%', c:'#16a34a'},
       ];
     }
   },
 
   arm:{
-    name:'Bras 6-DOF', dof:6,
+    name:'Bras 6-DOF Industriel', dof:6,
+    defaults:{ j1:0,j2:30,j3:-55,j4:0,j5:0,j6:0 },
     build(){ return buildArm(); },
-    focus(){ orb.tx=0;orb.ty=.35;orb.tz=0;orb.r=1.1;orb.phi=.58;updCam(); },
+    focus(){ orb.tx=0;orb.ty=.35;orb.tz=0;orb.r=1.05;orb.phi=.56;updCam(); },
+
     kinematic(s,dt){
       const C=G.consts.arm,j=s.joints;
-      const t1=(j.j1||0)*Math.PI/180,t2=(j.j2||30)*Math.PI/180;
-      const t3=(j.j3||-55)*Math.PI/180,t5=(j.j5||0)*Math.PI/180;
+      const t1=(j.j1||0)*Math.PI/180, t2=(j.j2||30)*Math.PI/180;
+      const t3=(j.j3||-55)*Math.PI/180, t5=(j.j5||0)*Math.PI/180;
       const r=Math.cos(t2)*C.L1.v+Math.cos(t2+t3)*C.L2.v+Math.cos(t2+t3+t5)*C.L3.v;
-      s.x=Math.cos(t1)*r; s.y=.045+Math.sin(t2)*C.L1.v+Math.sin(t2+t3)*C.L2.v+Math.sin(t2+t3+t5)*C.L3.v; s.z=Math.sin(t1)*r;
+      s.x=Math.cos(t1)*r;
+      s.y=.04+Math.sin(t2)*C.L1.v+Math.sin(t2+t3)*C.L2.v+Math.sin(t2+t3+t5)*C.L3.v;
+      s.z=Math.sin(t1)*r;
       const dx=s.x-(s.px||s.x),dy=s.y-(s.py||s.y),dz=s.z-(s.pz||s.z);
-      s.vlin=Math.sqrt(dx*dx+dy*dy+dz*dz)/dt; s.px=s.x;s.py=s.y;s.pz=s.z;
+      s.vlin=Math.sqrt(dx*dx+dy*dy+dz*dz)/Math.max(dt,.001);
+      s.px=s.x;s.py=s.y;s.pz=s.z;
     },
-    animate(g,s){
+
+    animate(g,s,dt){
       const j=s.joints;
-      if(g.userData.j1) g.userData.j1.rotation.y=(j.j1||0)*Math.PI/180;
-      if(g.userData.j2) g.userData.j2.rotation.x=-(j.j2||30)*Math.PI/180;
-      if(g.userData.j3) g.userData.j3.rotation.x=-(j.j3||-55)*Math.PI/180;
-      if(g.userData.j4) g.userData.j4.rotation.y=(j.j4||0)*Math.PI/180;
-      if(g.userData.j5) g.userData.j5.rotation.x=-(j.j5||0)*Math.PI/180;
-      if(g.userData.finger1) g.userData.finger1.rotation.z=(j.j6||0)*Math.PI/180*.45;
-      if(g.userData.finger2) g.userData.finger2.rotation.z=-(j.j6||0)*Math.PI/180*.45;
+      if(g.userData.j1) g.userData.j1.rotation.y  =  (j.j1||0)*Math.PI/180;
+      if(g.userData.j2) g.userData.j2.rotation.x  = -(j.j2||30)*Math.PI/180;
+      if(g.userData.j3) g.userData.j3.rotation.x  = -(j.j3||-55)*Math.PI/180;
+      if(g.userData.j4) g.userData.j4.rotation.y  =  (j.j4||0)*Math.PI/180;
+      if(g.userData.j5) g.userData.j5.rotation.x  = -(j.j5||0)*Math.PI/180;
+      const grip=(j.j6||0)*Math.PI/180*.45;
+      if(g.userData.finger1) g.userData.finger1.rotation.z= grip;
+      if(g.userData.finger2) g.userData.finger2.rotation.z=-grip;
     },
-    autoTraj(s,traj,t){
-      const sp=G.consts.arm.spd.v;
-      if(traj==='circle'){ s.joints.j1=Math.sin(t*.8)*70;s.joints.j2=30+Math.sin(t*.4)*22;s.joints.j3=-55+Math.cos(t*.6)*18;s.joints.j5=Math.sin(t*.5)*25; }
-      if(traj==='fig8'){ s.joints.j1=Math.sin(t)*55;s.joints.j2=20+Math.sin(t*2)*28;s.joints.j5=Math.cos(t*2)*32; }
-      if(traj==='square'){ const ph=Math.floor(t*1.5)%4;const tg=[[60,25,-40],[60,-25,-40],[-60,-25,-40],[-60,25,-40]];s.joints.j1=tg[ph][0];s.joints.j2=tg[ph][1];s.joints.j3=tg[ph][2]; }
-    },
+
     applyKeys(s,keys,dt){
       const C=G.consts.arm,sp=C.spd.v*dt;
-      if(keys.up) s.joints.j2=Math.min(90,(s.joints.j2||30)+sp);
-      if(keys.down) s.joints.j2=Math.max(-90,(s.joints.j2||30)-sp);
-      if(keys.left) s.joints.j1=Math.max(-180,(s.joints.j1||0)-sp*2);
+      if(keys.up)    s.joints.j2=Math.min(90,(s.joints.j2||30)+sp);
+      if(keys.down)  s.joints.j2=Math.max(-90,(s.joints.j2||30)-sp);
+      if(keys.left)  s.joints.j1=Math.max(-180,(s.joints.j1||0)-sp*2);
       if(keys.right) s.joints.j1=Math.min(180,(s.joints.j1||0)+sp*2);
     },
+
+    autoTraj(s,traj,t){
+      if(traj==='circle'){s.joints.j1=Math.sin(t*.8)*75;s.joints.j2=25+Math.sin(t*.4)*25;s.joints.j3=-55+Math.cos(t*.6)*20;s.joints.j5=Math.sin(t*.5)*28;}
+      if(traj==='fig8'){s.joints.j1=Math.sin(t)*60;s.joints.j2=20+Math.sin(t*2)*30;s.joints.j5=Math.cos(t*2)*35;}
+      if(traj==='square'){const ph=Math.floor(t*1.5)%4;const tg=[[70,25,-40],[70,-25,-40],[-70,-25,-40],[-70,25,-40]];s.joints.j1=tg[ph][0];s.joints.j2=tg[ph][1];s.joints.j3=tg[ph][2];}
+    },
+
     equations(s){
       const C=G.consts.arm,j=s.joints||{};
       return [
-        ['Paramètres DH',
-          `J1:a=0     d=.045 α=0    θ=${(j.j1||0).toFixed(1)}°`,
-          `J2:a=${C.L1.v}  d=0    α=π/2  θ=${(j.j2||30).toFixed(1)}°`,
-          `J3:a=${C.L2.v}  d=0    α=0    θ=${(j.j3||-55).toFixed(1)}°`,
-          `J4:a=0     d=0    α=π/2  θ=${(j.j4||0).toFixed(1)}°`,
-          `J5:a=${C.L3.v}  d=0    α=-π/2 θ=${(j.j5||0).toFixed(1)}°`],
-        ['Position TCP',
-          `x=${(s.x||0).toFixed(4)}m  y=${(s.y||0).toFixed(4)}m  z=${(s.z||0).toFixed(4)}m`,
-          `|TCP|=${Math.sqrt(Math.pow(s.x||0,2)+Math.pow(s.z||0,2)).toFixed(4)}m`,
-          `|v_TCP|=${(s.vlin||0).toFixed(4)} m/s`],
+        ['Paramètres Denavit-Hartenberg',
+          `     a_i    d_i    α_i      θ_i`,
+          `J1:  0      .040   0        ${(j.j1||0).toFixed(1)}°`,
+          `J2:  ${C.L1.v}   0      π/2      ${(j.j2||30).toFixed(1)}°`,
+          `J3:  ${C.L2.v}   0      0        ${(j.j3||-55).toFixed(1)}°`,
+          `J4:  0      0      π/2      ${(j.j4||0).toFixed(1)}°`,
+          `J5:  ${C.L3.v}   0      -π/2     ${(j.j5||0).toFixed(1)}°`,
+          `J6:  0      .055   0        0°`],
+        ['Position TCP (Direct)',
+          `x_TCP = ${(s.x||0).toFixed(4)} m`,
+          `y_TCP = ${(s.y||0).toFixed(4)} m`,
+          `z_TCP = ${(s.z||0).toFixed(4)} m`,
+          `|r|   = ${Math.sqrt((s.x||0)**2+(s.z||0)**2).toFixed(4)} m`],
+        ['Vitesse & Jacobien',
+          `|v_TCP| = ${(s.vlin||0).toFixed(4)} m/s`,
+          `ẋ_tcp = J(q)·q̇  (J ∈ ℝ⁶ˣ⁶)`],
       ];
     },
+
     telem(s){
       const j=s.joints||{};
-      return [{l:'J1',v:(j.j1||0).toFixed(1),u:'°',c:'#f85149'},{l:'J2',v:(j.j2||30).toFixed(1),u:'°',c:'#3fb950'},{l:'J3',v:(j.j3||-55).toFixed(1),u:'°',c:'#58a6ff'},{l:'J4',v:(j.j4||0).toFixed(1),u:'°',c:'#bc8cff'},{l:'TCP X',v:(s.x||0).toFixed(3),u:'m',c:'#f85149'},{l:'TCP Y',v:(s.y||0).toFixed(3),u:'m',c:'#3fb950'},{l:'TCP Z',v:(s.z||0).toFixed(3),u:'m',c:'#58a6ff'},{l:'V TCP',v:(s.vlin||0).toFixed(3),u:'m/s',c:'#39d0d8'}];
+      return [
+        {l:'J1',     v:(j.j1||0).toFixed(1),  u:'°',   c:'#dc2626'},
+        {l:'J2',     v:(j.j2||30).toFixed(1), u:'°',   c:'#16a34a'},
+        {l:'J3',     v:(j.j3||-55).toFixed(1),u:'°',   c:'#2563eb'},
+        {l:'J4',     v:(j.j4||0).toFixed(1),  u:'°',   c:'#7c3aed'},
+        {l:'TCP X',  v:(s.x||0).toFixed(3),   u:'m',   c:'#dc2626'},
+        {l:'TCP Y',  v:(s.y||0).toFixed(3),   u:'m',   c:'#16a34a'},
+        {l:'TCP Z',  v:(s.z||0).toFixed(3),   u:'m',   c:'#2563eb'},
+        {l:'V TCP',  v:(s.vlin||0).toFixed(3),u:'m/s', c:'#0891b2'},
+      ];
     }
   },
 
   drone:{
     name:'Drone Quadrirotor', dof:6,
+    defaults:{ thrust:40,roll:0,pitch:0,yawR:0 },
     build(){ return buildDrone(); },
-    focus(){ orb.tx=0;orb.ty=.3;orb.tz=0;orb.r=1.0;orb.phi=.55;updCam(); },
+    focus(){ orb.tx=0;orb.ty=.18;orb.tz=0;orb.r=.95;orb.phi=.55;updCam(); },
+
     kinematic(s,dt){
       const C=G.consts.drone;
       const T=(s.joints.thrust||40)/100;
-      const g=9.81;
-      const az=T*g*C.thrust_coef.v-g;
-      s.vz=(s.vz||0)+az*dt-s.vz*(C.drag.v)*dt;
+      const g_=9.81;
+      const az=T*g_*C.kT.v - g_ - (s.vz||0)*C.drag.v;
+      s.vz=(s.vz||0)+az*dt;
       s.alt=Math.max(0,(s.alt||0)+s.vz*dt);
-      if(s.alt<=0) s.vz=0;
+      if(s.alt<=0&&s.vz<0){s.vz=0;}
       s.yawAng=(s.yawAng||0)+(s.joints.yawR||0)*Math.PI/180*dt;
-      const pitch=(s.joints.pitch||0)*Math.PI/180;
-      const vhTgt=T*Math.sin(pitch)*C.vmax_horiz.v;
-      s.vlin=(s.vlin||0)*0.92+vhTgt*0.08;
-      s.x=(s.x||0)+Math.cos(s.yawAng)*s.vlin*dt;
-      s.z=(s.z||0)+Math.sin(s.yawAng)*s.vlin*dt;
-      s.accel=az; s.vang=s.joints.yawR||0; s.y=s.alt;
+      const pit=(s.joints.pitch||0)*Math.PI/180, rol=(s.joints.roll||0)*Math.PI/180;
+      const vhTgt=T*Math.sin(pit)*C.vhMax.v;
+      s.vlin=(s.vlin||0)*.88+vhTgt*.12;
+      const vhFwd=s.vlin*Math.cos(s.yawAng), vhSide=s.vlin*Math.sin(s.yawAng);
+      s._dx=(s._dx||0)+vhFwd*dt; s._dz=(s._dz||0)+vhSide*dt;
+      s.x=s._dx; s.z=s._dz;
+      s.accel=az; s.vang=(s.joints.yawR||0); s.y=s.alt;
     },
+
     animate(g,s,dt){
-      g.position.set(s.x,s.alt||0,s.z);
+      g.position.set(s.x||0,s.alt||0,s.z||0);
       g.rotation.y=-(s.yawAng||0);
-      g.rotation.x=(s.joints.pitch||0)*Math.PI/180;
-      g.rotation.z=-(s.joints.roll||0)*Math.PI/180;
+      // Inclinaison physiquement correcte (pitch/roll liés à la direction de la poussée)
+      const pitchTarget=(s.joints.pitch||0)*Math.PI/180;
+      const rollTarget=(s.joints.roll||0)*Math.PI/180;
+      s._pitchVis=(s._pitchVis||0)*.85+pitchTarget*.15;
+      s._rollVis=(s._rollVis||0)*.85+rollTarget*.15;
+      g.rotation.x=s._pitchVis;
+      g.rotation.z=-s._rollVis;
+      // Hélices — vitesse proportionnelle à la poussée
       const T=(s.joints.thrust||40)/100;
-      g.userData.props?.forEach((p,i)=>{ p.rotation.y+=(i%2===0?1:-1)*T*22*dt; });
+      g.userData.props?.forEach((p,i)=>{ p.rotation.y+=(i%2===0?1:-1)*T*28*dt; });
     },
-    autoTraj(s,traj,t){
-      if(traj==='circle'){ s.joints.thrust=58;s.joints.pitch=12;s.joints.yawR=30;s.joints.roll=8; }
-      if(traj==='fig8'){ s.joints.thrust=56;s.joints.pitch=Math.sin(t)*10;s.joints.roll=Math.sin(t*2)*8;s.joints.yawR=15; }
-      if(traj==='square'){ const ph=Math.floor(t*1.2)%4;const pi=[12,-12,0,0],ro=[0,0,12,-12];s.joints.thrust=56;s.joints.pitch=pi[ph];s.joints.roll=ro[ph];s.joints.yawR=0; }
-    },
+
     applyKeys(s,keys,dt){
-      if(keys.up) s.joints.thrust=Math.min(100,(s.joints.thrust||40)+80*dt);
-      if(keys.down) s.joints.thrust=Math.max(0,(s.joints.thrust||40)-80*dt);
-      if(keys.left) s.joints.yawR=-60;
-      if(keys.right) s.joints.yawR=60;
-      if(!keys.left&&!keys.right) s.joints.yawR=0;
+      if(keys.up)   s.joints.thrust=Math.min(100,(s.joints.thrust||40)+90*dt);
+      if(keys.down) s.joints.thrust=Math.max(0,(s.joints.thrust||40)-90*dt);
+      s.joints.yawR=keys.left?-70:keys.right?70:0;
     },
+
+    autoTraj(s,traj,t){
+      if(traj==='circle'){s.joints.thrust=58;s.joints.pitch=14;s.joints.yawR=32;s.joints.roll=8;}
+      if(traj==='fig8'){s.joints.thrust=57;s.joints.pitch=Math.sin(t)*11;s.joints.roll=Math.sin(t*2)*9;s.joints.yawR=18;}
+      if(traj==='square'){const ph=Math.floor(t*1.2)%4;const pi=[14,-14,0,0],ro=[0,0,14,-14];s.joints.thrust=57;s.joints.pitch=pi[ph];s.joints.roll=ro[ph];s.joints.yawR=0;}
+    },
+
     equations(s){
       const C=G.consts.drone,T=(s.joints?.thrust||40)/100;
       return [
-        ['Newton-Euler',
-          `m·z̈=ΣFᵢ·cos(φ)cos(θ)-m·g`,
-          `   =${(T*C.mass.v*9.81*C.thrust_coef.v).toFixed(3)}-${(C.mass.v*9.81).toFixed(3)}=${(T*C.mass.v*9.81*C.thrust_coef.v-C.mass.v*9.81).toFixed(3)} N`,
-          `m=${C.mass.v}kg  k_t=${C.thrust_coef.v}`],
-        ['État',
-          `Alt=${(s.alt||0).toFixed(3)}m  Vz=${(s.vz||0).toFixed(3)}m/s`,
-          `Vh=${(s.vlin||0).toFixed(3)}m/s  a=${(s.accel||0).toFixed(3)}m/s²`,
-          `Yaw=${((s.yawAng||0)*180/Math.PI).toFixed(1)}°`],
+        ['Équations de Newton-Euler',
+          `m·ẍ = T·sin(θ)·cos(φ)        = ${(T*C.mass.v*9.81*C.kT.v*Math.sin((s.joints?.pitch||0)*Math.PI/180)).toFixed(3)} N`,
+          `m·ÿ = T·cos(θ)·cos(φ) - m·g  = ${(T*C.mass.v*9.81*C.kT.v-C.mass.v*9.81).toFixed(3)} N`,
+          `m   = ${C.mass.v} kg`],
+        ['Poussée / État',
+          `T_total = ${(T*C.mass.v*9.81*C.kT.v).toFixed(3)} N`,
+          `Alt = ${(s.alt||0).toFixed(3)} m`,
+          `Vz  = ${(s.vz||0).toFixed(3)} m/s`,
+          `Vh  = ${(s.vlin||0).toFixed(3)} m/s`,
+          `a   = ${(s.accel||0).toFixed(3)} m/s²`],
       ];
     },
+
     telem(s){
-      return [{l:'Altitude',v:(s.alt||0).toFixed(3),u:'m',c:'#58a6ff'},{l:'V vert',v:(s.vz||0).toFixed(3),u:'m/s',c:'#39d0d8'},{l:'V horiz',v:(s.vlin||0).toFixed(3),u:'m/s',c:'#3fb950'},{l:'Accél',v:(s.accel||0).toFixed(3),u:'m/s²',c:'#f0883e'},{l:'Roll',v:(s.joints?.roll||0).toFixed(1),u:'°',c:'#f85149'},{l:'Pitch',v:(s.joints?.pitch||0).toFixed(1),u:'°',c:'#d29922'},{l:'Thrust',v:(s.joints?.thrust||40).toFixed(0),u:'%',c:'#bc8cff'},{l:'Cap',v:((s.yawAng||0)*180/Math.PI).toFixed(1),u:'°',c:'#58a6ff'}];
+      return [
+        {l:'Altitude',  v:(s.alt||0).toFixed(3),  u:'m',   c:'#2563eb'},
+        {l:'Vz',        v:(s.vz||0).toFixed(3),   u:'m/s', c:'#0891b2'},
+        {l:'Vh',        v:(s.vlin||0).toFixed(3), u:'m/s', c:'#16a34a'},
+        {l:'Accél.',    v:(s.accel||0).toFixed(3),u:'m/s²',c:'#ea580c'},
+        {l:'Roll',      v:(s.joints?.roll||0).toFixed(1),  u:'°',c:'#dc2626'},
+        {l:'Pitch',     v:(s.joints?.pitch||0).toFixed(1), u:'°',c:'#b45309'},
+        {l:'Thrust',    v:(s.joints?.thrust||40).toFixed(0),u:'%',c:'#7c3aed'},
+        {l:'Cap',       v:((s.yawAng||0)*180/Math.PI).toFixed(1),u:'°',c:'#2563eb'},
+      ];
     }
   },
 
   biped:{
-    name:'Robot Bipède', dof:12,
+    name:'Robot Bipède Humanoïde', dof:12,
+    defaults:{ hL:0,kL:0,aL:0,hR:0,kR:0,aR:0,torso:0,walk:0 },
     build(){ return buildBiped(); },
-    focus(){ orb.tx=0;orb.ty=.35;orb.tz=0;orb.r=1.3;orb.phi=.6;updCam(); },
+    focus(){ orb.tx=0;orb.ty=.38;orb.tz=0;orb.r=1.25;orb.phi=.58;updCam(); },
+
     kinematic(s,dt){
       const C=G.consts.biped;
       if((s.joints.walk||0)>.5){
-        s.walkPhase=(s.walkPhase||0)+dt*C.step_freq.v;
+        s.walkPhase=(s.walkPhase||0)+dt*C.freq.v;
         const ph=s.walkPhase;
-        s.joints.hL=Math.sin(ph)*C.step_amp.v;
-        s.joints.kL=Math.abs(Math.sin(ph))*C.step_amp.v*1.35;
-        s.joints.aL=Math.sin(ph)*-10;
-        s.joints.hR=-Math.sin(ph)*C.step_amp.v;
-        s.joints.kR=Math.abs(Math.cos(ph))*C.step_amp.v*1.35;
-        s.joints.aR=-Math.sin(ph)*10;
-        s.joints.torso=Math.sin(ph)*6;
-        s.x=(s.x||0)+Math.cos(s.yaw||0)*C.walk_spd.v*dt;
-        s.z=(s.z||0)+Math.sin(s.yaw||0)*C.walk_spd.v*dt;
-        s.vlin=C.walk_spd.v;
-      } else s.vlin=0;
+        // Cycle de marche avec balancement naturel du centre de masse
+        s.joints.hL  =  Math.sin(ph)*C.amp.v;
+        s.joints.kL  =  Math.max(0,Math.sin(ph)*C.amp.v*1.3);
+        s.joints.aL  = -Math.sin(ph)*C.amp.v*.3;
+        s.joints.hR  = -Math.sin(ph)*C.amp.v;
+        s.joints.kR  =  Math.max(0,-Math.sin(ph)*C.amp.v*1.3);
+        s.joints.aR  =  Math.sin(ph)*C.amp.v*.3;
+        // Balancement du torse (contre-rotation naturelle)
+        s.joints.torso = Math.sin(ph)*C.amp.v*.2;
+        // Avancer
+        s.x=(s.x||0)+Math.cos(s.yaw||0)*C.wSpd.v*dt;
+        s.z=(s.z||0)+Math.sin(s.yaw||0)*C.wSpd.v*dt;
+        s.vlin=C.wSpd.v;
+      } else {
+        // Retour progressif à zéro
+        ['hL','kL','aL','hR','kR','aR','torso'].forEach(k=>{ s.joints[k]=(s.joints[k]||0)*.88; });
+        s.vlin=0;
+      }
     },
-    animate(g,s){
+
+    animate(g,s,dt){
       const j=s.joints||{};
       g.position.set(s.x||0,0,s.z||0);
+      g.rotation.y=s.yaw||0;
       if(g.userData.torso) g.userData.torso.rotation.z=(j.torso||0)*Math.PI/180;
-      if(g.userData.legLG) g.userData.legLG.rotation.x=(j.hL||0)*Math.PI/180;
-      if(g.userData.knLG)  g.userData.knLG.rotation.x=-(j.kL||0)*Math.PI/180;
-      if(g.userData.ankLG) g.userData.ankLG.rotation.x=(j.aL||0)*Math.PI/180;
-      if(g.userData.legRG) g.userData.legRG.rotation.x=(j.hR||0)*Math.PI/180;
-      if(g.userData.knRG)  g.userData.knRG.rotation.x=-(j.kR||0)*Math.PI/180;
-      if(g.userData.ankRG) g.userData.ankRG.rotation.x=(j.aR||0)*Math.PI/180;
+      if(g.userData.legLG) g.userData.legLG.rotation.x= (j.hL||0)*Math.PI/180;
+      if(g.userData.knLG)  g.userData.knLG.rotation.x =-Math.max(0,(j.kL||0))*Math.PI/180;
+      if(g.userData.ankLG) g.userData.ankLG.rotation.x= (j.aL||0)*Math.PI/180;
+      if(g.userData.legRG) g.userData.legRG.rotation.x= (j.hR||0)*Math.PI/180;
+      if(g.userData.knRG)  g.userData.knRG.rotation.x =-Math.max(0,(j.kR||0))*Math.PI/180;
+      if(g.userData.ankRG) g.userData.ankRG.rotation.x= (j.aR||0)*Math.PI/180;
     },
+
+    applyKeys(s,keys,dt){
+      s.joints.walk=(keys.up||keys.down)?1:0;
+      if(keys.left)  s.yaw=(s.yaw||0)-.045;
+      if(keys.right) s.yaw=(s.yaw||0)+.045;
+    },
+
     autoTraj(s,traj,t){
       s.joints.walk=1;
-      if(traj==='circle') s.yaw=(s.yaw||0)+.8*(1/60);
-      if(traj==='fig8') s.yaw=(s.yaw||0)+Math.sin(t*.5)*.05;
+      if(traj==='circle') s.yaw=(s.yaw||0)+.022;
+      if(traj==='fig8')   s.yaw=(s.yaw||0)+Math.sin(t*.5)*.06;
     },
-    applyKeys(s,keys,dt){
-      if(keys.up||keys.down){ s.joints.walk=1; if(keys.down) s.joints.walk=.5; }
-      else s.joints.walk=0;
-      if(keys.left) s.yaw=(s.yaw||0)-.04;
-      if(keys.right) s.yaw=(s.yaw||0)+.04;
-    },
+
     equations(s){
       const C=G.consts.biped,j=s.joints||{};
       const hL=(j.hL||0)*Math.PI/180,kL=(j.kL||0)*Math.PI/180;
+      const L1=.24,L2=.22;
       return [
-        ['IK Jambe',
-          `x_pied=L₁·sin(θ_h)+L₂·sin(θ_h+θ_k)`,
-          `      =${(0.22*Math.sin(hL)+0.19*Math.sin(hL+kL)).toFixed(4)}m`,
-          `y_pied=-L₁·cos(θ_h)-L₂·cos(θ_h+θ_k)`,
-          `      =${(-0.22*Math.cos(hL)-0.19*Math.cos(hL+kL)).toFixed(4)}m`],
-        ['Cycle de marche',
-          `Phase=${((s.walkPhase||0)%(2*Math.PI)/(2*Math.PI)*100).toFixed(0)}%`,
-          `Freq=${C.step_freq.v}Hz  Amp=${C.step_amp.v}°`,
-          `V=${(s.vlin||0).toFixed(3)}m/s  X=${(s.x||0).toFixed(3)}m`],
+        ['Cinématique Inverse — Jambe',
+          `x_pied = L₁·sin(θ_h) + L₂·sin(θ_h+θ_k)`,
+          `       = ${(L1*Math.sin(hL)+L2*Math.sin(hL+kL)).toFixed(4)} m`,
+          `y_pied = -L₁·cos(θ_h) - L₂·cos(θ_h+θ_k)`,
+          `       = ${(-L1*Math.cos(hL)-L2*Math.cos(hL+kL)).toFixed(4)} m`],
+        ['Cycle de Marche',
+          `Phase   = ${((s.walkPhase||0)%(2*Math.PI)/(2*Math.PI)*100).toFixed(0)}%`,
+          `Freq    = ${C.freq.v} Hz`,
+          `Amp     = ${C.amp.v}°`,
+          `V       = ${(s.vlin||0).toFixed(3)} m/s`],
       ];
     },
+
     telem(s){
       const j=s.joints||{};
-      return [{l:'Hanche G',v:(j.hL||0).toFixed(1),u:'°',c:'#f85149'},{l:'Genou G',v:(j.kL||0).toFixed(1),u:'°',c:'#3fb950'},{l:'Hanche D',v:(j.hR||0).toFixed(1),u:'°',c:'#58a6ff'},{l:'Genou D',v:(j.kR||0).toFixed(1),u:'°',c:'#bc8cff'},{l:'Vitesse',v:(s.vlin||0).toFixed(3),u:'m/s',c:'#39d0d8'},{l:'Phase',v:((s.walkPhase||0)%(Math.PI*2)/(Math.PI*2)*100).toFixed(0),u:'%',c:'#f0883e'},{l:'Marche',v:(j.walk||0)>.5?'ON':'OFF',u:'',c:'#3fb950'},{l:'Pos X',v:(s.x||0).toFixed(3),u:'m',c:'#d29922'}];
+      return [
+        {l:'Hanche G', v:(j.hL||0).toFixed(1),u:'°',  c:'#dc2626'},
+        {l:'Genou G',  v:(j.kL||0).toFixed(1),u:'°',  c:'#16a34a'},
+        {l:'Hanche D', v:(j.hR||0).toFixed(1),u:'°',  c:'#2563eb'},
+        {l:'Genou D',  v:(j.kR||0).toFixed(1),u:'°',  c:'#7c3aed'},
+        {l:'Vitesse',  v:(s.vlin||0).toFixed(3),u:'m/s',c:'#0891b2'},
+        {l:'Phase',    v:((s.walkPhase||0)%(Math.PI*2)/(Math.PI*2)*100).toFixed(0),u:'%',c:'#ea580c'},
+        {l:'Marche',   v:(j.walk||0)>.5?'ON':'OFF',u:'',c:'#16a34a'},
+        {l:'Pos X',    v:(s.x||0).toFixed(3),u:'m',c:'#b45309'},
+      ];
     }
   }
 };
 
-// ═══════════════════════════════════════════════
-// OSC
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// OSCILLOSCOPE
+// ═══════════════════════════════════════════════════════
 const osc_cv=document.getElementById('osc');
 const osc_cx=osc_cv.getContext('2d');
 const oscBuf=[];
+
 function renderOsc(){
   const W=osc_cv.width,H=osc_cv.height;
   if(!W||!H)return;
-  osc_cx.clearRect(0,0,W,H); osc_cx.fillStyle='#0a0d12'; osc_cx.fillRect(0,0,W,H);
-  osc_cx.strokeStyle='rgba(255,255,255,.03)'; osc_cx.lineWidth=1;
+  osc_cx.clearRect(0,0,W,H);
+  osc_cx.fillStyle='#f5f6f8'; osc_cx.fillRect(0,0,W,H);
+  // Grille
+  osc_cx.strokeStyle='rgba(0,0,0,.06)'; osc_cx.lineWidth=1;
   for(let i=1;i<8;i++){osc_cx.beginPath();osc_cx.moveTo(i*W/8,0);osc_cx.lineTo(i*W/8,H);osc_cx.stroke();}
   for(let i=1;i<4;i++){osc_cx.beginPath();osc_cx.moveTo(0,i*H/4);osc_cx.lineTo(W,i*H/4);osc_cx.stroke();}
-  osc_cx.strokeStyle='rgba(255,255,255,.06)'; osc_cx.beginPath(); osc_cx.moveTo(0,H/2); osc_cx.lineTo(W,H/2); osc_cx.stroke();
-  if(!G.simOn){osc_cx.fillStyle='rgba(100,116,139,.3)';osc_cx.font='10px JetBrains Mono';osc_cx.textAlign='center';osc_cx.fillText('▶ Simuler',W/2,H/2);return;}
+  osc_cx.strokeStyle='rgba(0,0,0,.1)'; osc_cx.beginPath(); osc_cx.moveTo(0,H/2); osc_cx.lineTo(W,H/2); osc_cx.stroke();
+  if(!G.simOn){
+    osc_cx.fillStyle='#9aa0ab'; osc_cx.font='10px Inter'; osc_cx.textAlign='center';
+    osc_cx.fillText('▶ Lancer la simulation',W/2,H/2); return;
+  }
   if(oscBuf.length<2)return;
   const mn=Math.min(...oscBuf),mx=Math.max(...oscBuf),rng=mx-mn||1;
-  osc_cx.save();osc_cx.shadowBlur=4;osc_cx.shadowColor='#58a6ff';osc_cx.strokeStyle='#58a6ff';osc_cx.lineWidth=1.5;osc_cx.beginPath();
+  osc_cx.save();
+  osc_cx.strokeStyle='#2563eb'; osc_cx.lineWidth=1.8;
+  osc_cx.shadowColor='rgba(37,99,235,.3)'; osc_cx.shadowBlur=4;
+  osc_cx.beginPath();
   oscBuf.forEach((v,i)=>{const px=(i/(oscBuf.length-1))*W,py=H-((v-mn)/rng)*(H*.76)-H*.12;i===0?osc_cx.moveTo(px,py):osc_cx.lineTo(px,py);});
-  osc_cx.stroke();osc_cx.restore();
-  osc_cx.fillStyle='#58a6ff';osc_cx.font='9px JetBrains Mono';osc_cx.textAlign='left';
+  osc_cx.stroke(); osc_cx.restore();
+  osc_cx.fillStyle='#2563eb'; osc_cx.font='9px JetBrains Mono'; osc_cx.textAlign='left';
   osc_cx.fillText(oscBuf[oscBuf.length-1].toFixed(3)+' m/s',5,11);
 }
 
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 // APP
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
 const App={
+
   setRobot(type){
     G.robot=type;
-    G.state={x:0,z:0,y:0,yaw:0,vlin:0,vang:0,accel:0,prevVl:0,dist:0,alt:0,vz:0,walkPhase:0,yawAng:0,joints:{}};
-    // Init joints
-    const def=ROBOTS[type];
-    const defaultJoints={rover:{vlin:0,vang:0,camP:0,camT:0,pump:0},arm:{j1:0,j2:30,j3:-55,j4:0,j5:0,j6:0},drone:{thrust:40,roll:0,pitch:0,yawR:0},biped:{hL:0,kL:0,aL:0,hR:0,kR:0,aR:0,torso:0,walk:0}};
-    G.state.joints={...defaultJoints[type]};
+    G.state={x:0,z:0,y:0,yaw:0,vlin:0,vang:0,accel:0,omega:0,prevVl:0,dist:0,alt:0,vz:0,walkPhase:0,yawAng:0,t:0,_x:0,_z:0,_dx:0,_dz:0,joints:{}};
+    G.state.joints={...ROBOTS[type].defaults};
     if(robotMesh){scene.remove(robotMesh);robotMesh=null;}
     this.clearTraj(); oscBuf.length=0;
-    robotMesh=def.build(); scene.add(robotMesh);
-    def.focus();
-    this.buildCtrlPanel();
-    this.buildConstPanel();
+    robotMesh=ROBOTS[type].build(); scene.add(robotMesh);
+    ROBOTS[type].focus();
+    this.buildCtrlPanel(); this.buildConstPanel();
     this.updateEq(); this.updateTelem();
-    ['rover','arm','drone','biped'].forEach(r=>{ document.getElementById('rt-'+r).className='rtab'+(r===type?' on':''); });
-    document.getElementById('sb-r').textContent=' '+def.name;
-    document.getElementById('sb-dof').textContent=' '+def.dof;
+    ['rover','arm','drone','biped'].forEach(r=>document.getElementById('rt-'+r).className='rtab'+(r===type?' on':''));
+    document.getElementById('sb-r').textContent=' '+ROBOTS[type].name;
+    document.getElementById('sb-dof').textContent=' '+ROBOTS[type].dof;
     G.traj='manual'; this.setTraj('manual');
-    if(robotMesh) def.animate(robotMesh,G.state,.033);
+    if(robotMesh) ROBOTS[type].animate(robotMesh,G.state,.033);
   },
 
   buildCtrlPanel(){
     let html='';
     const r=G.robot;
-
     if(r==='rover'){
-      html=`
-        <div class="ctrl-title">Contrôle Rover</div>
-        <div class="rover-ctrl">
-          <div class="dpad">
-            <div></div>
-            <button class="dpad-btn" id="dp-up"
-              ontouchstart="App.kd('up',true)" ontouchend="App.kd('up',false)"
-              onmousedown="App.kd('up',true)" onmouseup="App.kd('up',false)" onmouseleave="App.kd('up',false)">▲</button>
-            <div></div>
-            <button class="dpad-btn" id="dp-left"
-              ontouchstart="App.kd('left',true)" ontouchend="App.kd('left',false)"
-              onmousedown="App.kd('left',true)" onmouseup="App.kd('left',false)" onmouseleave="App.kd('left',false)">◄</button>
-            <button class="dpad-btn dpad-center" onclick="App.stopRover()">■</button>
-            <button class="dpad-btn" id="dp-right"
-              ontouchstart="App.kd('right',true)" ontouchend="App.kd('right',false)"
-              onmousedown="App.kd('right',true)" onmouseup="App.kd('right',false)" onmouseleave="App.kd('right',false)">►</button>
-            <div></div>
-            <button class="dpad-btn" id="dp-down"
-              ontouchstart="App.kd('down',true)" ontouchend="App.kd('down',false)"
-              onmousedown="App.kd('down',true)" onmouseup="App.kd('down',false)" onmouseleave="App.kd('down',false)">▼</button>
-            <div></div>
+      html=`<div class="ctrl-title">Contrôle Rover</div>
+      <div class="rover-ctrl">
+        <div style="display:flex;gap:16px;align-items:flex-start;justify-content:center">
+          <div class="drone-stick-wrap">
+            <div class="stick-label">Vitesse / Direction</div>
+            <div class="stick-zone" id="stick-rover"
+              ontouchstart="App.roverStickStart(event)" ontouchmove="App.roverStickMove(event)" ontouchend="App.roverStickEnd()"
+              onmousedown="App.roverStickStart(event)">
+              <div class="stick-knob" id="knob-rover"></div>
+            </div>
+            <div style="font-family:'JetBrains Mono';font-size:11px;color:var(--blue);font-weight:600;text-align:center" id="rover-stick-disp">0.00 m/s · 0°/s</div>
           </div>
-          <div style="display:flex;gap:8px;width:100%;max-width:220px">
-            <button class="dpad-btn" style="flex:1;height:38px;border-radius:8px;font-size:11px;white-space:nowrap" onclick="App.setJ_rover('pump',100)">💧 Pompe ON</button>
-            <button class="dpad-btn" style="flex:1;height:38px;border-radius:8px;font-size:11px;white-space:nowrap" onclick="App.setJ_rover('pump',0)">💧 Pompe OFF</button>
-          </div>
-        </div>`;
+        </div>
+        <div style="display:flex;gap:7px;width:100%;max-width:240px;margin-top:4px">
+          <button class="dpad-btn" style="flex:1;height:36px;border-radius:9px;font-size:11px;font-weight:600;white-space:nowrap" onclick="App.setJ('pump',100)">💧 Pompe ON</button>
+          <button class="dpad-btn" style="flex:1;height:36px;border-radius:9px;font-size:11px;font-weight:600;white-space:nowrap" onclick="App.setJ('pump',0)">OFF</button>
+        </div>
+      </div>`;
     }
     else if(r==='arm'){
       const jDefs=[{id:'j1',n:'J1 Base'},{id:'j2',n:'J2 Épaule'},{id:'j3',n:'J3 Coude'},{id:'j4',n:'J4 Poig.R'},{id:'j5',n:'J5 Poig.P'},{id:'j6',n:'J6 Pince'}];
-      const jMins={j1:-180,j2:-90,j3:-135,j4:-180,j5:-90,j6:0};
-      const jMaxs={j1:180,j2:90,j3:135,j4:180,j5:90,j6:85};
-      html=`<div class="ctrl-title">Contrôle Bras</div><div class="arm-ctrl">
+      const jLim={j1:[-180,180],j2:[-90,90],j3:[-135,135],j4:[-180,180],j5:[-90,90],j6:[0,85]};
+      html=`<div class="ctrl-title">Contrôle Bras 6-DOF</div><div class="arm-ctrl">
         ${jDefs.map(j=>`<div class="joint-ctrl">
           <div class="jc-name">${j.n}</div>
           <div class="jc-val" id="jcv-${j.id}">${(G.state.joints[j.id]||0).toFixed(1)}°</div>
           <div class="jc-btns">
             <button class="jc-btn" ontouchstart="App.jHold('${j.id}',-1)" onmousedown="App.jHold('${j.id}',-1)" ontouchend="App.jStop('${j.id}')" onmouseup="App.jStop('${j.id}')" onmouseleave="App.jStop('${j.id}')">−</button>
-            <button class="jc-btn" style="font-size:11px;color:var(--t3)" onclick="App.setJ_arm('${j.id}',0)">0</button>
+            <button class="jc-btn" style="font-size:10px;color:var(--t3)" onclick="App.jReset('${j.id}')">0</button>
             <button class="jc-btn" ontouchstart="App.jHold('${j.id}',1)" onmousedown="App.jHold('${j.id}',1)" ontouchend="App.jStop('${j.id}')" onmouseup="App.jStop('${j.id}')" onmouseleave="App.jStop('${j.id}')">+</button>
           </div>
         </div>`).join('')}
       </div>`;
     }
     else if(r==='drone'){
-      html=`
-        <div class="ctrl-title">Contrôle Drone</div>
-        <div class="drone-ctrl">
-          <div class="drone-stick-wrap">
-            <div class="stick-label">Lacet / Altitude</div>
-            <div class="stick-zone" id="stick-left" ontouchstart="App.stickStart(event,'L')" ontouchmove="App.stickMove(event,'L')" ontouchend="App.stickEnd('L')" onmousedown="App.stickStart(event,'L')">
-              <div class="stick-knob" id="knob-L"></div>
-            </div>
+      html=`<div class="ctrl-title">Contrôle Drone</div>
+      <div class="drone-ctrl">
+        <div class="drone-stick-wrap">
+          <div class="stick-label">Lacet / Thrust</div>
+          <div class="stick-zone" id="stick-L"
+            ontouchstart="App.stickStart(event,'L')" ontouchmove="App.stickMove(event,'L')" ontouchend="App.stickEnd('L')"
+            onmousedown="App.stickStart(event,'L')">
+            <div class="stick-knob" id="knob-L"></div>
           </div>
-          <div class="drone-stick-wrap">
-            <div class="stick-label">Direction</div>
-            <div class="stick-zone" id="stick-right" ontouchstart="App.stickStart(event,'R')" ontouchmove="App.stickMove(event,'R')" ontouchend="App.stickEnd('R')" onmousedown="App.stickStart(event,'R')">
-              <div class="stick-knob" id="knob-R"></div>
-            </div>
+        </div>
+        <div class="drone-stick-wrap">
+          <div class="stick-label">Direction</div>
+          <div class="stick-zone" id="stick-R"
+            ontouchstart="App.stickStart(event,'R')" ontouchmove="App.stickMove(event,'R')" ontouchend="App.stickEnd('R')"
+            onmousedown="App.stickStart(event,'R')">
+            <div class="stick-knob" id="knob-R"></div>
           </div>
-          <div class="drone-alt-ctrl">
-            <div class="stick-label">Thrust</div>
-            <button class="alt-btn" ontouchstart="App.kd('up',true)" ontouchend="App.kd('up',false)" onmousedown="App.kd('up',true)" onmouseup="App.kd('up',false)" onmouseleave="App.kd('up',false)">↑</button>
-            <div style="font-family:'JetBrains Mono';font-size:12px;color:var(--blue)" id="thrust-disp">${(G.state.joints.thrust||40).toFixed(0)}%</div>
-            <button class="alt-btn" ontouchstart="App.kd('down',true)" ontouchend="App.kd('down',false)" onmousedown="App.kd('down',true)" onmouseup="App.kd('down',false)" onmouseleave="App.kd('down',false)">↓</button>
-          </div>
-        </div>`;
+        </div>
+        <div class="drone-alt-ctrl">
+          <div class="stick-label">Thrust</div>
+          <button class="alt-btn" ontouchstart="App.kd('up',true)" ontouchend="App.kd('up',false)" onmousedown="App.kd('up',true)" onmouseup="App.kd('up',false)" onmouseleave="App.kd('up',false)">↑</button>
+          <div style="font-family:'JetBrains Mono';font-size:12px;color:var(--blue);font-weight:600" id="thrust-disp">${(G.state.joints.thrust||40).toFixed(0)}%</div>
+          <button class="alt-btn" ontouchstart="App.kd('down',true)" ontouchend="App.kd('down',false)" onmousedown="App.kd('down',true)" onmouseup="App.kd('down',false)" onmouseleave="App.kd('down',false)">↓</button>
+        </div>
+      </div>`;
     }
     else if(r==='biped'){
-      html=`
-        <div class="ctrl-title">Contrôle Bipède</div>
-        <div class="biped-ctrl">
-          <button class="walk-btn" id="walk-btn" onclick="App.toggleWalk()">🚶 Démarrer la marche</button>
-          <div class="biped-turn">
-            <button class="turn-btn" ontouchstart="App.kd('left',true)" ontouchend="App.kd('left',false)" onmousedown="App.kd('left',true)" onmouseup="App.kd('left',false)" onmouseleave="App.kd('left',false)">↺</button>
-            <button class="turn-btn" style="flex:0 0 44px" onclick="App.resetRobot()">⊙</button>
-            <button class="turn-btn" ontouchstart="App.kd('right',true)" ontouchend="App.kd('right',false)" onmousedown="App.kd('right',true)" onmouseup="App.kd('right',false)" onmouseleave="App.kd('right',false)">↻</button>
-          </div>
-          <div style="display:flex;gap:6px;width:100%">
-            <button class="dpad-btn" style="flex:1;height:38px;border-radius:8px" onclick="App.poseBiped('squat')">🦵 Squat</button>
-            <button class="dpad-btn" style="flex:1;height:38px;border-radius:8px" onclick="App.poseBiped('wave')">👋 Wave</button>
-            <button class="dpad-btn" style="flex:1;height:38px;border-radius:8px" onclick="App.poseBiped('stand')">🧍 Debout</button>
-          </div>
-        </div>`;
+      html=`<div class="ctrl-title">Contrôle Bipède</div>
+      <div class="biped-ctrl">
+        <button class="walk-btn" id="walk-btn" onclick="App.toggleWalk()">🚶 Démarrer la marche</button>
+        <div class="biped-turn">
+          <button class="turn-btn" ontouchstart="App.kd('left',true)" ontouchend="App.kd('left',false)" onmousedown="App.kd('left',true)" onmouseup="App.kd('left',false)" onmouseleave="App.kd('left',false)">↺</button>
+          <button class="turn-btn" style="flex:0 0 42px" onclick="App.resetRobot()">⊙</button>
+          <button class="turn-btn" ontouchstart="App.kd('right',true)" ontouchend="App.kd('right',false)" onmousedown="App.kd('right',true)" onmouseup="App.kd('right',false)" onmouseleave="App.kd('right',false)">↻</button>
+        </div>
+        <div style="display:flex;gap:6px;width:100%">
+          <button class="dpad-btn" style="flex:1;height:38px;border-radius:9px;font-size:13px" onclick="App.poseBiped('squat')">🦵 Squat</button>
+          <button class="dpad-btn" style="flex:1;height:38px;border-radius:9px;font-size:13px" onclick="App.poseBiped('stand')">🧍 Debout</button>
+        </div>
+      </div>`;
     }
-      document.getElementById('ctrl-panel-mobile') && (document.getElementById('ctrl-panel-mobile').innerHTML = html);
-    document.getElementById('ctrl-panel-desktop') && (document.getElementById('ctrl-panel-desktop').innerHTML = html);
+    document.getElementById('ctrl-panel-desktop')&&(document.getElementById('ctrl-panel-desktop').innerHTML=html);
+    document.getElementById('ctrl-panel-mobile')&&(document.getElementById('ctrl-panel-mobile').innerHTML=html);
   },
 
   buildConstPanel(){
@@ -1137,100 +1585,146 @@ const App={
         ${Object.entries(C).map(([k,p])=>`
           <div class="const-card">
             <div class="const-label">${p.l}</div>
-            <input type="number" class="const-input" value="${p.v}" min="${p.mn}" max="${p.mx}"
-              step="${(p.mx-p.mn)>10?.1:.001}"
+            <input type="number" class="const-input" value="${p.v}" min="${p.mn}" max="${p.mx}" step="${(p.mx-p.mn)>10?.1:.001}"
               onchange="App.setConst('${k}',parseFloat(this.value))">
             <div class="const-unit">${p.u}</div>
           </div>`).join('')}
       </div>`;
-    document.getElementById('const-panel-mobile') && (document.getElementById('const-panel-mobile').innerHTML = html);
-    document.getElementById('const-panel-desktop') && (document.getElementById('const-panel-desktop').innerHTML = html);
+    document.getElementById('const-panel-desktop')&&(document.getElementById('const-panel-desktop').innerHTML=html);
+    document.getElementById('const-panel-mobile')&&(document.getElementById('const-panel-mobile').innerHTML=html);
   },
 
   setConst(k,v){
     const C=G.consts[G.robot];
-    if(C[k]) C[k].v=Math.max(C[k].mn,Math.min(C[k].mx,v));
+    if(C[k]) C[k].v=Math.max(C[k].mn,Math.min(C[k].mx,isNaN(v)?C[k].v:v));
   },
 
-  // Joint hold for arm
   jIntervals:{},
   jHold(id,dir){
     if(this.jIntervals[id]) clearInterval(this.jIntervals[id]);
     this.jIntervals[id]=setInterval(()=>{
-      const C=G.consts.arm;
-      const mins={j1:-180,j2:-90,j3:-135,j4:-180,j5:-90,j6:0};
-      const maxs={j1:180,j2:90,j3:135,j4:180,j5:90,j6:85};
+      const lim={j1:[-180,180],j2:[-90,90],j3:[-135,135],j4:[-180,180],j5:[-90,90],j6:[0,85]};
+      const sp=G.consts.arm.spd.v*.033;
+      const [mn,mx]=lim[id]||[-180,180];
       const cur=G.state.joints[id]||0;
-      const nv=Math.max(mins[id],Math.min(maxs[id],cur+dir*C.spd.v*.033));
+      const nv=Math.max(mn,Math.min(mx,cur+dir*sp));
       G.state.joints[id]=nv;
       const el=document.getElementById('jcv-'+id);
       if(el) el.textContent=nv.toFixed(1)+'°';
-      if(!G.simOn&&robotMesh){ ROBOTS.arm.kinematic(G.state,.033); ROBOTS.arm.animate(robotMesh,G.state); this.updateHUD(); this.updateEq(); this.updateTelem(); }
+      if(!G.simOn&&robotMesh){ ROBOTS.arm.kinematic(G.state,.033); ROBOTS.arm.animate(robotMesh,G.state,.033); this.updateHUD(); this.updateEq(); this.updateTelem(); }
     },33);
   },
-  jStop(id){ if(this.jIntervals[id]){clearInterval(this.jIntervals[id]);delete this.jIntervals[id];} },
-  setJ_arm(id,v){ G.state.joints[id]=v; const el=document.getElementById('jcv-'+id); if(el) el.textContent=v.toFixed(1)+'°'; if(!G.simOn&&robotMesh){ROBOTS.arm.animate(robotMesh,G.state);} },
-  setJ_rover(id,v){ G.state.joints[id]=v; },
+  jStop(id){ clearInterval(this.jIntervals[id]); delete this.jIntervals[id]; },
+  jReset(id){ G.state.joints[id]=0; const el=document.getElementById('jcv-'+id); if(el) el.textContent='0.0°'; if(!G.simOn&&robotMesh){ ROBOTS.arm.animate(robotMesh,G.state,.033); } },
+  setJ(id,v){ G.state.joints[id]=v; },
+  stopRover(){ G.state.joints.vlin=0; G.state.joints.vang=0; G.state.vlin=0; G.state.omega=0; },
 
-  stopRover(){ G.state.joints.vlin=0; G.state.joints.vang=0; G.state.vlin=0; },
+  // ── JOYSTICK ROVER ANALOGIQUE ──
+  _roverStickActive: false,
+  _roverRect: null,
+  roverStickStart(e){
+    e.preventDefault(); e.stopPropagation();
+    // Chercher le stick dans les deux panels (desktop et mobile)
+    const el = document.getElementById('stick-rover') || document.querySelector('.stick-zone');
+    if(!el) return;
+    this._roverRect = el.getBoundingClientRect();
+    this._roverStickActive = true;
+    if(e.touches){
+      this._procRoverStick(e.touches[0].clientX, e.touches[0].clientY);
+    } else {
+      this._procRoverStick(e.clientX, e.clientY);
+      const mm = ev => { ev.preventDefault(); this._procRoverStick(ev.clientX, ev.clientY); };
+      const mu = () => { this.roverStickEnd(); window.removeEventListener('mousemove', mm); window.removeEventListener('mouseup', mu); };
+      window.addEventListener('mousemove', mm);
+      window.addEventListener('mouseup', mu);
+    }
+  },
+  roverStickMove(e){
+    e.preventDefault();
+    if(!e.touches.length || !this._roverStickActive) return;
+    this._procRoverStick(e.touches[0].clientX, e.touches[0].clientY);
+  },
+  _procRoverStick(cx, cy){
+    const rect = this._roverRect;
+    if(!rect) return;
+    const r = rect.width / 2;
+    let dx = Math.max(-r, Math.min(r, cx - rect.left - r));
+    let dy = Math.max(-r, Math.min(r, cy - rect.top - r));
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if(dist > r){ dx = dx/dist*r; dy = dy/dist*r; }
+    const knob = document.getElementById('knob-rover');
+    if(knob){ knob.style.left=`calc(50% + ${dx}px)`; knob.style.top=`calc(50% + ${dy}px)`; }
+    const nx = dx/r, ny = dy/r;
+    const C = G.consts.rover;
+    G.state.joints.vlin = -ny * C.vmax.v;
+    G.state.joints.vang =  nx * C.vamax.v;
+    const disp = document.getElementById('rover-stick-disp');
+    if(disp) disp.textContent = `${(-ny*C.vmax.v).toFixed(2)} m/s · ${(nx*C.vamax.v).toFixed(0)}°/s`;
+  },
+  roverStickEnd(){
+    this._roverStickActive = false;
+    this._roverRect = null;
+    const knob = document.getElementById('knob-rover');
+    if(knob){ knob.style.left='50%'; knob.style.top='50%'; }
+    G.state.joints.vlin = 0; G.state.joints.vang = 0;
+    const disp = document.getElementById('rover-stick-disp');
+    if(disp) disp.textContent = '0.00 m/s · 0°/s';
+  },
 
   toggleWalk(){
-    const w=G.state.joints.walk||0;
-    G.state.joints.walk=w>.5?0:1;
+    const w=(G.state.joints.walk||0)>.5?0:1;
+    G.state.joints.walk=w;
     const btn=document.getElementById('walk-btn');
-    if(btn){ if(G.state.joints.walk>.5){btn.textContent='⏹ Arrêter la marche';btn.classList.add('walking');}else{btn.textContent='🚶 Démarrer la marche';btn.classList.remove('walking');} }
+    if(btn){ btn.textContent=w>.5?'⏹ Arrêter la marche':'🚶 Démarrer la marche'; btn.classList.toggle('walking',w>.5); }
   },
-
   poseBiped(pose){
-    const j=G.state.joints;
-    if(pose==='squat'){j.hL=30;j.kL=60;j.hR=30;j.kR=60;j.walk=0;}
-    if(pose==='stand'){j.hL=0;j.kL=0;j.hR=0;j.kR=0;j.torso=0;j.walk=0;}
-    if(pose==='wave'){j.hL=0;j.kL=0;j.hR=0;j.kR=0;j.walk=0;}
-    if(robotMesh) ROBOTS.biped.animate(robotMesh,G.state);
+    if(pose==='squat'){Object.assign(G.state.joints,{hL:35,kL:65,hR:35,kR:65,walk:0});}
+    if(pose==='stand'){Object.assign(G.state.joints,{hL:0,kL:0,aL:0,hR:0,kR:0,aR:0,torso:0,walk:0});}
+    const btn=document.getElementById('walk-btn');
+    if(btn){ btn.textContent='🚶 Démarrer la marche'; btn.classList.remove('walking'); }
+    if(robotMesh) ROBOTS.biped.animate(robotMesh,G.state,.033);
   },
 
-  // Keys
   kd(key,pressed){
     G.keys[key]=pressed;
-    const btn=document.getElementById('dp-'+key);
-    if(btn) btn.classList.toggle('pressed',pressed);
+    const el=document.getElementById('dp-'+key);
+    if(el) el.classList.toggle('pressed',pressed);
   },
 
   // Joysticks drone
-  activeStick:null,
   stickStart(e,side){
-    e.preventDefault();
-    this.activeStick=side;
+    e.preventDefault(); e.stopPropagation();
     if(e.type.includes('mouse')){
       const mm=ev=>this.stickMoveM(ev,side);
       const mu=()=>{ this.stickEnd(side); window.removeEventListener('mousemove',mm); window.removeEventListener('mouseup',mu); };
-      window.addEventListener('mousemove',mm);
-      window.addEventListener('mouseup',mu);
+      window.addEventListener('mousemove',mm); window.addEventListener('mouseup',mu);
     }
   },
   stickMoveM(e,side){
-    const id=side==='L'?'stick-left':'stick-right';
-    const rect=document.getElementById(id).getBoundingClientRect();
-    this.processStick(e.clientX,e.clientY,rect,side);
+    const id='stick-'+side, rect=document.getElementById(id).getBoundingClientRect();
+    this._procStick(e.clientX,e.clientY,rect,side);
   },
   stickMove(e,side){
     e.preventDefault();
-    if(e.touches.length<1)return;
-    const id=side==='L'?'stick-left':'stick-right';
-    const rect=document.getElementById(id).getBoundingClientRect();
-    this.processStick(e.touches[0].clientX,e.touches[0].clientY,rect,side);
+    if(!e.touches.length)return;
+    const id='stick-'+side, rect=document.getElementById(id).getBoundingClientRect();
+    this._procStick(e.touches[0].clientX,e.touches[0].clientY,rect,side);
   },
-  processStick(cx,cy,rect,side){
+  _procStick(cx,cy,rect,side){
     const r=rect.width/2;
-    const dx=Math.max(-r,Math.min(r,cx-rect.left-r));
-    const dy=Math.max(-r,Math.min(r,cy-rect.top-r));
-    const norm=Math.sqrt(dx*dx+dy*dy);
-    const ndx=norm>r?dx/norm*r:dx, ndy=norm>r?dy/norm*r:dy;
+    let dx=Math.max(-r,Math.min(r,cx-rect.left-r));
+    let dy=Math.max(-r,Math.min(r,cy-rect.top-r));
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist>r){dx=dx/dist*r;dy=dy/dist*r;}
     const knob=document.getElementById('knob-'+side);
-    if(knob){knob.style.left=`calc(50% + ${ndx}px)`;knob.style.top=`calc(50% + ${ndy}px)`;}
-    const nx=ndx/r, ny=ndy/r;
-    if(side==='L'){ G.state.joints.yawR=nx*90; const ta=(G.state.joints.thrust||40)+-ny*3; G.state.joints.thrust=Math.max(0,Math.min(100,ta)); const el=document.getElementById('thrust-disp'); if(el) el.textContent=G.state.joints.thrust.toFixed(0)+'%'; }
-    if(side==='R'){ G.state.joints.pitch=-ny*30; G.state.joints.roll=nx*25; }
+    if(knob){knob.style.left=`calc(50% + ${dx}px)`;knob.style.top=`calc(50% + ${dy}px)`;}
+    const nx=dx/r,ny=dy/r;
+    if(side==='L'){
+      G.state.joints.yawR=nx*80;
+      G.state.joints.thrust=Math.max(0,Math.min(100,(G.state.joints.thrust||40)-ny*2.5));
+      const el=document.getElementById('thrust-disp'); if(el) el.textContent=(G.state.joints.thrust||40).toFixed(0)+'%';
+    }
+    if(side==='R'){G.state.joints.pitch=-ny*32; G.state.joints.roll=nx*28;}
   },
   stickEnd(side){
     const knob=document.getElementById('knob-'+side);
@@ -1250,7 +1744,7 @@ const App={
     G.traj=type; G.trajT=0;
     if(type==='manual'&&G.robot==='biped'){G.state.joints.walk=0;const btn=document.getElementById('walk-btn');if(btn){btn.textContent='🚶 Démarrer la marche';btn.classList.remove('walking');}}
     document.getElementById('sb-m').textContent=' '+type;
-    ['manual','circle','square','fig8'].forEach(t=>{ document.getElementById('tj-'+t).className='traj-btn'+(t===type?' on':''); });
+    ['manual','circle','square','fig8'].forEach(t=>{ const el=document.getElementById('tj-'+t); if(el) el.className='traj-btn'+(t===type?' on':''); });
   },
 
   toggleSim(){ G.simOn?this.stopSim():this.startSim(); },
@@ -1258,59 +1752,60 @@ const App={
     G.simOn=true; G.simT=0; G.trajT=0;
     this.clearTraj(); oscBuf.length=0;
     document.getElementById('sled').classList.add('on');
-    document.getElementById('st-lbl').textContent='En cours'; document.getElementById('st-lbl').style.color='var(--green)';
-    document.getElementById('btn-sim').textContent='⏹ Arrêter'; document.getElementById('btn-sim').className='sim-btn stop';
+    document.getElementById('st-lbl').textContent='En cours';
+    document.getElementById('st-lbl').style.color='var(--green)';
+    document.getElementById('btn-sim').textContent='⏹ Arrêter';
+    document.getElementById('btn-sim').className='btn stop';
     G.simIv=setInterval(()=>this.tick(),33);
   },
   stopSim(){
     G.simOn=false; clearInterval(G.simIv);
     document.getElementById('sled').className='sled';
-    document.getElementById('st-lbl').textContent='Arrêt'; document.getElementById('st-lbl').style.color='';
-    document.getElementById('btn-sim').innerHTML='▶ Simuler'; document.getElementById('btn-sim').className='sim-btn go';
+    document.getElementById('st-lbl').textContent='Arrêt';
+    document.getElementById('st-lbl').style.color='';
+    document.getElementById('btn-sim').textContent='▶ Simuler';
+    document.getElementById('btn-sim').className='btn go';
   },
 
   tick(){
-    const dt=.033; G.simT+=dt; G.trajT+=dt;
+    const dt=.033; G.simT+=dt; G.trajT+=dt; G.state.t=G.simT;
     document.getElementById('st-t').textContent=G.simT.toFixed(3)+'s';
     document.getElementById('sb-t').textContent=' '+G.simT.toFixed(3)+'s';
     const def=ROBOTS[G.robot];
-    // Auto trajectory
     if(G.traj!=='manual') def.autoTraj(G.state,G.traj,G.trajT);
-    // Manual keys
     else def.applyKeys(G.state,G.keys,dt);
-    // Kinematic
     def.kinematic(G.state,dt);
-    // Animate
     if(robotMesh) def.animate(robotMesh,G.state,dt);
-    // Traj line
-    const py=G.state.alt||0;
-    trajPts.push(new THREE.Vector3(G.state.x,py+(G.robot==='arm'?G.state.y:0.012),G.state.z));
-    if(trajPts.length>1200) trajPts.shift();
+    // Trajectoire 3D
+    const py=G.robot==='arm'?G.state.y:(G.state.alt||0);
+    trajPts.push(new THREE.Vector3(G.state.x||0,py+.012,G.state.z||0));
+    if(trajPts.length>1500) trajPts.shift();
     if(trajLine){scene.remove(trajLine);trajLine=null;}
     if(trajPts.length>1){
-      const geo=new THREE.BufferGeometry().setFromPoints(trajPts);
-      trajLine=new THREE.Line(geo,new THREE.LineBasicMaterial({color:0x58a6ff,opacity:.5,transparent:true}));
+      trajLine=new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(trajPts),
+        new THREE.LineBasicMaterial({color:0x2563eb,opacity:.5,transparent:true})
+      );
       scene.add(trajLine);
     }
     // Camera follow
     if(robotMesh&&G.robot!=='arm'){
       orb.tx+=(robotMesh.position.x-orb.tx)*.05;
       orb.tz+=(robotMesh.position.z-orb.tz)*.05;
-      if(G.robot==='drone') orb.ty+=((G.state.alt||0)+.3-orb.ty)*.05;
+      if(G.robot==='drone') orb.ty+=((G.state.alt||0)+.25-orb.ty)*.05;
       updCam();
     }
     // Osc
     const ov=G.state.vlin||G.state.alt||0;
     oscBuf.push(ov); if(oscBuf.length>450) oscBuf.shift();
-    // Update arm joint vals
+    // Sync UI bras
     if(G.robot==='arm'){
       ['j1','j2','j3','j4','j5','j6'].forEach(id=>{
         const el=document.getElementById('jcv-'+id);
         if(el) el.textContent=(G.state.joints[id]||0).toFixed(1)+'°';
       });
     }
-    // Drone thrust display
-    if(G.robot==='drone'){ const el=document.getElementById('thrust-disp'); if(el) el.textContent=(G.state.joints.thrust||40).toFixed(0)+'%'; }
+    if(G.robot==='drone'){const el=document.getElementById('thrust-disp');if(el) el.textContent=(G.state.joints.thrust||40).toFixed(0)+'%';}
     this.updateHUD(); this.updateEq(); this.updateTelem();
   },
 
@@ -1328,29 +1823,30 @@ const App={
   updateEq(){
     const secs=ROBOTS[G.robot].equations(G.state);
     const html=secs.map(([t,...ls])=>`<div class="esec"><div class="esec-t">${t}</div>${ls.map(l=>`<div class="eline">${l.replace(/(-?[0-9]+\.?[0-9]*)/g,'<span class="n">$1</span>')}</div>`).join('')}</div>`).join('');
-    document.getElementById('eq').innerHTML=html;
-    document.getElementById('eq-mobile').innerHTML=html;
+    const eq=document.getElementById('eq'); if(eq) eq.innerHTML=html;
+    const eqm=document.getElementById('eq-mobile'); if(eqm) eqm.innerHTML=html;
   },
 
   updateTelem(){
     const items=ROBOTS[G.robot].telem(G.state);
     const html=items.map(t=>`<div class="tc"><div class="tc-l">${t.l}</div><div class="tc-v" style="color:${t.c}">${t.v}</div><div class="tc-u">${t.u}</div></div>`).join('');
-    document.getElementById('telem').innerHTML=html;
+    const tel=document.getElementById('telem'); if(tel) tel.innerHTML=html;
     const mhtml=items.map(t=>`<div class="tcm"><div class="tcm-l">${t.l}</div><div class="tcm-v" style="color:${t.c}">${t.v}</div><div class="tcm-u">${t.u}</div></div>`).join('');
-    document.getElementById('telem-mobile').innerHTML=mhtml;
+    const telm=document.getElementById('telem-mobile'); if(telm) telm.innerHTML=mhtml;
   },
 
   resetRobot(){
     const def=ROBOTS[G.robot];
-    G.state={x:0,z:0,y:0,yaw:0,vlin:0,vang:0,accel:0,prevVl:0,dist:0,alt:0,vz:0,walkPhase:0,yawAng:0,joints:{}};
-    const defaults={rover:{vlin:0,vang:0,camP:0,camT:0,pump:0},arm:{j1:0,j2:30,j3:-55,j4:0,j5:0,j6:0},drone:{thrust:40,roll:0,pitch:0,yawR:0},biped:{hL:0,kL:0,aL:0,hR:0,kR:0,aR:0,torso:0,walk:0}};
-    G.state.joints={...defaults[G.robot]};
+    G.state={x:0,z:0,y:0,yaw:0,vlin:0,vang:0,accel:0,omega:0,prevVl:0,dist:0,alt:0,vz:0,walkPhase:0,yawAng:0,t:0,_x:0,_z:0,_dx:0,_dz:0,joints:{}};
+    G.state.joints={...def.defaults};
     this.clearTraj(); oscBuf.length=0;
     if(robotMesh){robotMesh.position.set(0,0,0);robotMesh.rotation.set(0,0,0);}
     def.focus();
     if(robotMesh) def.animate(robotMesh,G.state,.033);
     this.updateHUD(); this.updateEq(); this.updateTelem();
-    if(G.robot==='biped'){const btn=document.getElementById('walk-btn');if(btn){btn.textContent='🚶 Démarrer la marche';btn.classList.remove('walking');}}
+    ['up','down','left','right'].forEach(k=>G.keys[k]=false);
+    const wb=document.getElementById('walk-btn');
+    if(wb){wb.textContent='🚶 Démarrer la marche';wb.classList.remove('walking');}
   },
 
   clearTraj(){ trajPts.length=0; if(trajLine){scene.remove(trajLine);trajLine=null;} },
@@ -1367,7 +1863,7 @@ const App={
   }
 };
 
-// Keyboard
+// Clavier
 window.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT')return;
   if(e.key===' '){e.preventDefault();App.toggleSim();}
@@ -1388,20 +1884,20 @@ window.addEventListener('keyup',e=>{
   if(e.key==='ArrowRight') App.kd('right',false);
 });
 
-// Render loop
+// Boucle de rendu
 let _fc=0,_ft=Date.now();
 function renderLoop(){
   requestAnimationFrame(renderLoop);
-  _fc++;
-  const now=Date.now();
+  _fc++; const now=Date.now();
   if(now-_ft>=1000){document.getElementById('st-fps').textContent=_fc+'fps';_fc=0;_ft=now;}
   renderer.render(scene,camera);
   renderOsc();
 }
 
-// START
+// Démarrage après chargement DOM
 window.addEventListener('load',()=>{
   resizeAll();
+  updCam();
   App.setRobot('rover');
   renderLoop();
 });
