@@ -1,0 +1,60 @@
+{
+  "name": "Mecatron Sim — Simulateur de Robots",
+  "short_name": "Mecatron Sim",
+  "description": "Simulateur 3D de robots : rover 4WD, bras 6-DOF, drone quadrirotor et bipède humanoïde. Cinématique, dynamique et équations en temps réel.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#ffffff",
+  "theme_color": "#0a0a0c",
+  "lang": "fr",
+  "dir": "ltr",
+  "categories": [
+    "education",
+    "productivity",
+    "utilities"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Rover 4WD",
+      "short_name": "Rover",
+      "url": "./index.html?robot=rover"
+    },
+    {
+      "name": "Bras 6-DOF",
+      "short_name": "Bras",
+      "url": "./index.html?robot=arm"
+    },
+    {
+      "name": "Drone",
+      "short_name": "Drone",
+      "url": "./index.html?robot=drone"
+    },
+    {
+      "name": "Bipède",
+      "short_name": "Bipède",
+      "url": "./index.html?robot=biped"
+    }
+  ]
+}
