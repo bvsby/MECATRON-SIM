@@ -1,69 +1,97 @@
 # Mecatron Sim
 
-Simulateur 3D de robots installable en PWA — rover 4WD, bras 6-DOF, drone quadrirotor et bipède humanoïde, avec cinématique, dynamique et équations en temps réel.
+Simulateur 3D de robots — rover 4WD, bras 6-DOF, drone quadrirotor, bipède humanoïde.
+Application BV Store, protégée par le système de licences du CRM.
 
-## Contenu
+## Structure
 
 ```
-mecatronsim/
-├── index.html              application complète (autonome)
-├── manifest.json           manifeste PWA
-├── sw.js                   service worker (cache hors-ligne)
-├── icon-192.png            icône
-├── icon-512.png            icône
-├── icon-180.png            icône Apple Touch
-├── icon-maskable-512.png   icône adaptative Android
-└── favicon.png
+mecatron-sim/
+├── vercel.json           configuration Vercel (outputDirectory: public)
+├── README.md
+└── public/
+    ├── index.html        l'application
+    ├── manifest.json     manifeste PWA
+    ├── sw.js             service worker
+    └── *.png             icônes
 ```
+
+**Ne pas déplacer `index.html` à la racine.** Vercel ignore la racine dès qu'un dossier `public/` est déclaré comme `outputDirectory`.
+
+## Avant le premier déploiement
+
+### 1. Déclarer l'app dans le CRM
+
+Catalogue d'apps → nouvelle app avec le slug exact :
+
+```
+mecatron-sim
+```
+
+Le slug est vérifié côté serveur : une clé émise pour une autre app sera refusée.
+
+### 2. Renseigner l'URL du CRM
+
+Dans `public/index.html`, ligne 22 environ, deux endroits à modifier :
+
+```html
+<script>window.BV_CRM_URL = 'https://bv-crm-ten.vercel.app';</script>
+<script src="https://bv-crm-ten.vercel.app/bv-license.js"></script>
+```
+
+### 3. Autoriser l'origine côté CRM
+
+`api/license.js` doit accepter les requêtes venant du domaine de Mecatron Sim
+(en-tête `Access-Control-Allow-Origin`).
 
 ## Déploiement
 
-**Prérequis : HTTPS.** Une PWA ne s'installe pas en HTTP (sauf `localhost`).
-
-### Vercel
 ```bash
-cd mecatronsim
 vercel --prod
 ```
 
-### Netlify
-Glisser le dossier sur netlify.com/drop.
+Ou via GitHub : pousser le dépôt, puis l'importer dans Vercel.
+Vercel lit `vercel.json` automatiquement.
 
-### GitHub Pages
-Pousser le dossier dans un dépôt, puis Settings → Pages → activer sur la branche `main`.
+## Fonctionnement de la licence
 
-### Test local
-```bash
-cd mecatronsim
-python3 -m http.server 8080
-# puis ouvrir http://localhost:8080
-```
+Au premier lancement, un écran demande la clé. Une fois validée, elle est mémorisée
+et l'app démarre directement aux lancements suivants.
 
-## Installation sur l'appareil
+| Situation | Comportement |
+|---|---|
+| Clé valide | Accès normal |
+| Clé inconnue | Blocage, ressaisie possible |
+| Licence suspendue | Blocage sous 12 h maximum |
+| Échéance dépassée | Blocage, même si le statut est resté « active » |
+| CRM injoignable | Accès maintenu 3 jours, puis blocage |
 
-- **Android / Chrome** — un bouton ⬇ apparaît dans la barre du haut, ou menu ⋮ → « Installer l'application ».
-- **iOS / Safari** — Partager → « Sur l'écran d'accueil ». (iOS n'expose pas de bouton d'installation automatique.)
-- **Desktop / Chrome, Edge** — icône d'installation dans la barre d'adresse.
+Réglages dans `index.html` : `cacheHeures` (défaut 12) et `toleranceJours` (défaut 3).
+Baisser `cacheHeures` accélère la prise en compte d'une suspension, au prix de plus
+d'appels réseau.
 
-Une fois installée, l'application se lance en plein écran sans barre de navigateur, et fonctionne hors-ligne après la première visite.
+### Point d'attention
 
-## Raccourcis
-
-Un appui long sur l'icône installée propose d'ouvrir directement un robot. Accessible aussi par URL : `index.html?robot=drone`.
+Le service worker **n'intercepte jamais** `/api/` ni `bv-license.js`. C'est délibéré :
+mettre en cache une réponse de licence rendrait toute suspension inopérante.
+Si vous modifiez `sw.js`, conservez cette exclusion.
 
 ## Mise à jour
 
-Le service worker sert le cache en priorité. Après modification des fichiers, **incrémenter la version** dans `sw.js` :
+Incrémenter le numéro de cache dans `public/sw.js` à chaque déploiement :
 
 ```js
-const CACHE = 'mecatron-sim-v2';   // v1 → v2
+const CACHE = 'mecatron-sim-v5';   // v5 → v6
 ```
 
-Sans cela les utilisateurs conserveront l'ancienne version.
+Sans cela, les utilisateurs conservent l'ancienne version.
 
-## Fonctionnement hors-ligne
+## Limite connue
 
-Three.js et les polices sont chargés depuis des CDN et mis en cache à la première visite (stratégie *stale-while-revalidate*). L'application est donc pleinement utilisable hors connexion ensuite.
+La vérification s'exécute dans le navigateur. Un utilisateur techniquement averti peut
+la contourner en lisant le source. Le système sert au suivi et à la révocation, pas à
+l'inviolabilité. Pour une protection réelle, il faudrait servir l'application depuis le
+serveur après validation.
 
 ## Contrôles
 
@@ -72,11 +100,6 @@ Three.js et les polices sont chargés depuis des CDN et mis en cache à la premi
 | Orbiter | clic droit glissé | 1 doigt |
 | Zoom | molette | 2 doigts (écarter) |
 | Déplacer | Alt + clic glissé | 2 doigts (glisser) |
-| Piloter | flèches | joystick à l'écran |
+| Piloter | flèches | joystick |
 | Simuler | Espace | bouton ▶ |
-| Réinitialiser | R | bouton ↺ |
 | Changer de robot | 1 · 2 · 3 · 4 | onglets |
-
-## Pile technique
-
-HTML/CSS/JS sans dépendance de build. Three.js r128 (CDN) pour le rendu WebGL, environnement studio procédural pour les réflexions PBR.

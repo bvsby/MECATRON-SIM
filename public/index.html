@@ -13,6 +13,14 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <title>Mecatron Sim</title>
+
+<!-- ════════════════════════════════════════════════════════════
+     LICENCE BV STORE
+     Remplacer CRM_URL par l'URL de votre CRM déployé sur Vercel.
+     Le slug doit correspondre à celui de l'app dans le catalogue.
+     ════════════════════════════════════════════════════════════ -->
+<script>window.BV_CRM_URL = 'https://bv-crm-ten.vercel.app';</script>
+<script src="https://bv-crm-ten.vercel.app/bv-license.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -1603,13 +1611,49 @@ window.addEventListener('appinstalled',()=>{
   const b=document.getElementById('btn-install'); if(b) b.style.display='none';
 });
 
-// Démarrage
-window.addEventListener('load',()=>{
-  resizeAll();updCam();
-  // Raccourci PWA : ?robot=rover|arm|drone|biped
+// ── PROTECTION PAR LICENCE ──
+// L'app ne démarre que si la licence est valide.
+function demarrerApp(){
+  resizeAll(); updCam();
   const qp=new URLSearchParams(location.search).get('robot');
   App.setRobot(['rover','arm','drone','biped'].includes(qp)?qp:'rover');
   renderLoop();
+}
+
+// Démarrage
+window.addEventListener('load',()=>{
+  if(typeof BVLicense==='undefined'){
+    // Bibliothèque injoignable : on n'ouvre pas l'app en grand,
+    // mais on ne casse pas non plus si le CRM est en panne au tout premier chargement.
+    console.warn('[Licence] bv-license.js injoignable');
+    document.body.innerHTML='<div style="font-family:Inter,sans-serif;display:flex;align-items:center;'+
+      'justify-content:center;height:100vh;padding:24px;text-align:center;color:#1a1f2e">'+
+      '<div><div style="font-size:44px;margin-bottom:12px">🔌</div>'+
+      '<h2 style="margin-bottom:8px;font-size:18px">Service de licence injoignable</h2>'+
+      '<p style="color:#55606e;font-size:14px;max-width:340px">Vérifiez votre connexion puis rechargez la page.</p>'+
+      '</div></div>';
+    return;
+  }
+  BVLicense.protect({
+    app: 'mecatron-sim',
+    api: window.BV_CRM_URL + '/api/license',
+    cacheHeures: 12,
+    toleranceJours: 3,
+    onValide: (infos)=>{
+      // Si l'écran de licence a remplacé le DOM (première activation),
+      // le canvas n'existe plus : on recharge pour repartir sur un DOM propre.
+      if(!document.getElementById('cv')){ location.reload(); return; }
+      demarrerApp();
+      // Nom du client dans la barre de statut
+      try{
+        if(infos && infos.client){
+          const el=document.getElementById('sb-r');
+          const nom=infos.client.entreprise || infos.client.nom;
+          if(el && nom) el.title='Licence : '+nom;
+        }
+      }catch(e){}
+    }
+  });
 });
 </script>
 </body>

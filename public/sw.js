@@ -42,6 +42,13 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
+  // ── JAMAIS DE CACHE SUR LA LICENCE ──
+  // Une licence suspendue doit être refusée immédiatement.
+  // On laisse passer la requête au réseau sans jamais la stocker.
+  if (url.pathname.includes('/api/') || url.pathname.endsWith('bv-license.js')) {
+    return; // le navigateur gère, le SW ne s'en mêle pas
+  }
+
   // CDN → stale-while-revalidate (fonctionne hors-ligne après 1re visite)
   if (RUNTIME_HOSTS.includes(url.hostname)) {
     e.respondWith(
