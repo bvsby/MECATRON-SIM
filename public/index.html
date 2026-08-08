@@ -1670,9 +1670,9 @@ window.addEventListener('load',()=>{
     return;
   }
   BVLicense.protect({
-    app: 'mecatron-sim',
+    app: 'Mecatron-Sim',
     api: window.BV_CRM_URL + '/api/license',
-    cacheHeures: 1,     // 1 h : une suspension prend effet rapidement
+    cacheHeures: 0.0003,     // 1 h : une suspension prend effet rapidement
     toleranceJours: 3,
     onValide: (infos)=>{
       // Si l'écran de licence a remplacé le DOM (première activation),
