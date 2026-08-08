@@ -1611,6 +1611,41 @@ window.addEventListener('appinstalled',()=>{
   const b=document.getElementById('btn-install'); if(b) b.style.display='none';
 });
 
+// ── SURVEILLANCE CONTINUE DE LA LICENCE ──
+// En mode PWA l'utilisateur ne recharge jamais la page : sans cela, une
+// suspension ne serait vue qu'au prochain démarrage à froid.
+// On revérifie au retour dans l'app et à intervalle régulier.
+let _licDernier = Date.now();
+const LIC_INTERVALLE = 30 * 60 * 1000;   // 30 min en arrière-plan
+const LIC_RETOUR     = 5  * 60 * 1000;   // 5 min mini entre deux retours
+
+function revaliderLicence(force){
+  if(typeof BVLicense==='undefined' || !BVLicense.revalider) return;
+  const maintenant = Date.now();
+  if(!force && maintenant - _licDernier < LIC_RETOUR) return;
+  _licDernier = maintenant;
+  try{
+    const r = BVLicense.revalider();
+    // Si la bibliothèque renvoie une promesse, on coupe la simulation en cas de refus.
+    if(r && typeof r.then === 'function'){
+      r.then(function(ok){
+        if(ok === false){ if(G && G.simOn) App.stopSim(); }
+      }).catch(function(){});
+    }
+  }catch(e){}
+}
+
+function surveillerLicence(){
+  // Retour dans l'application (changement d'onglet, réouverture de la PWA)
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible') revaliderLicence(false);
+  });
+  window.addEventListener('focus', function(){ revaliderLicence(false); });
+  window.addEventListener('online', function(){ revaliderLicence(true); });
+  // Contrôle périodique tant que l'app reste ouverte
+  setInterval(function(){ revaliderLicence(true); }, LIC_INTERVALLE);
+}
+
 // ── PROTECTION PAR LICENCE ──
 // L'app ne démarre que si la licence est valide.
 function demarrerApp(){
@@ -1637,13 +1672,14 @@ window.addEventListener('load',()=>{
   BVLicense.protect({
     app: 'mecatron-sim',
     api: window.BV_CRM_URL + '/api/license',
-    cacheHeures: 12,
+    cacheHeures: 1,     // 1 h : une suspension prend effet rapidement
     toleranceJours: 3,
     onValide: (infos)=>{
       // Si l'écran de licence a remplacé le DOM (première activation),
       // le canvas n'existe plus : on recharge pour repartir sur un DOM propre.
       if(!document.getElementById('cv')){ location.reload(); return; }
       demarrerApp();
+      surveillerLicence();
       // Nom du client dans la barre de statut
       try{
         if(infos && infos.client){

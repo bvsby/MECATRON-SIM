@@ -81,10 +81,29 @@ Si vous modifiez `sw.js`, conservez cette exclusion.
 Incrémenter le numéro de cache dans `public/sw.js` à chaque déploiement :
 
 ```js
-const CACHE = 'mecatron-sim-v5';   // v5 → v6
+const CACHE = 'mecatron-sim-v6';   // v6 → v7
 ```
 
 Sans cela, les utilisateurs conservent l'ancienne version.
+
+## Deux pièges déjà corrigés — ne pas les réintroduire
+
+### `cleanUrls` interdit
+
+`vercel.json` ne doit **pas** contenir `"cleanUrls": true`. Cette option fait
+rediriger `/index.html` vers `/`. Le service worker mettait alors en cache une
+réponse portant un drapeau de redirection, et Safari refuse qu'un service worker
+réponde à une navigation avec une telle réponse :
+
+> Response served by service worker has redirections
+
+Résultat : écran noir au retour dans la PWA installée. Le service worker nettoie
+désormais ce drapeau, mais mieux vaut ne pas réactiver l'option.
+
+### Navigations en réseau d'abord
+
+Le service worker traite les navigations en réseau d'abord, cache en secours.
+Passer en cache d'abord ferait réapparaître le problème de version figée.
 
 ## Limite connue
 

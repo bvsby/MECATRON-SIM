@@ -1,6 +1,5 @@
 {
   "outputDirectory": "public",
-  "cleanUrls": true,
   "headers": [
     {
       "source": "/sw.js",
