@@ -1,5 +1,5 @@
 /* Mecatron Sim — Service Worker */
-const CACHE = 'mecatron-sim-v2';
+const CACHE = 'mecatron-sim-v4';
 
 // Ressources locales mises en cache à l'installation
 const CORE = [
